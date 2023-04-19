@@ -1,0 +1,54 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © rvtradesetup
+
+//@version=5
+indicator("MarketSmith Volumes", format = format.volume)
+trunc   = input(true, title="Truncate for MarketSmith type display", group = "DISPLAY")
+labels  = input(true, title="Labels on Volume", group = "DISPLAY")
+len     = input(50, "Length", group = "MA")
+tf      = timeframe.period
+ticker  = syminfo.tickerid
+
+s       = ticker == "NSE:NIFTY" ? "NSE:NIFTY1!" : ticker == "NSE:BANKNIFTY" ? "NSE:BANKNIFTY1!" : ticker == "NSE:CNXFINANCE" ? "NSE:FINNIFTY1!" : ticker
+vol     = request.security(s, tf, volume)
+colr    = (close > open) ? color.new(#2736E9, 0) : color.new(#de32ae, 0)
+ma      = ta.sma(vol, len)
+
+// plot(vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
+// plot(ma, title = "MA", color = color.red)
+
+// Display in the style of MarketSmith
+// // Recalculation of the volume with limitation
+vol2 = vol > 2*ma ? 2*ma:vol
+// // Display
+
+plot(trunc ? vol2:vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
+plot(ma, title = "MA", color = color.red)
+
+// Highest Volume
+// highestVolume = ta.highest(vol, 252)
+// condPlotHighest = volume == highestVolume
+// plotchar(condPlotHighest ? volume:na, char ="Ჿ", location=location.top, color=color.rgb(229,121,27,0), size = size.small)
+
+
+//------------------  Markerd Highs and Lows but for Volumes  ---------------------//
+
+// Price Peak/Valley Points
+// Highlights exact price at high or low points over a 19-period interval.
+// For example, on a Daily chart, a High Price point is marked on the date
+// where there has been no higher price the 9 days prior to that date and
+// the 9 days following that date.
+
+// High Price Point
+if(timeframe.isdaily and labels)
+    condvolPricePointBefore = vol[9] >= vol[10] and vol[9] >= vol[11] and vol[9] >= vol[12] and vol[9] >= vol[13] and vol[9] >= vol[14] and vol[9] >= vol[15] and vol[9] >= vol[16] and vol[9] >= vol[17] and vol[9] >= vol[18]
+    condvolPricePointAfter  = vol[9] > vol[8] and vol[9] > vol[7] and vol[9] > vol[6] and vol[9] > vol[5] and vol[9] > vol[4] and vol[9] > vol[3] and vol[9] > vol[2] and vol[9] > vol[1] and vol[9] > vol
+    condvolPricePoint       = condvolPricePointBefore and condvolPricePointAfter
+    if (condvolPricePoint)
+        textvol9 = str.tostring(vol[9]/1000000, '0.0')+'M'
+        if(vol >= 1000000000)
+            textvol9 := str.tostring(vol[9]/1000000000, '0.0')+'B'
+        //textvol9  = vol >= 1000000000 ? str.tostring(vol[9]/1000000000, '0.0')+'B': vol >= 1000000 ? str.tostring(vol[9]/1000000, '0.0')+'M':str.tostring(vol[9], '0.0')
+        volestvol = label.new(bar_index-9, trunc ? vol2[9]:vol[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textvol9, textcolor=color.rgb(0,0,0,0))
+    
+
