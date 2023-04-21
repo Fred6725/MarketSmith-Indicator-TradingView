@@ -162,7 +162,7 @@ sma100 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,100))
 sma50_2  = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,50))
 sma20  = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,20))
 // Daily Close SPX500
-spxCloseDa = request.security("SP:SPX", 'D', close)
+spxCloseDa = request.security(comparativeTickerId, 'D', close)
 // We save if we were above dedicated moving averages in a boolean variable
 // Reference point ticker
 bCloseAbove200 = closeDa > sma200_2 ? 1:0
@@ -389,7 +389,9 @@ else
 label1 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText1 , color = color.rgb(0,0,0,100), size=size.normal, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
 label2 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText2 , color = color.rgb(0,0,0,100), size=size.large, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
 
-
+// Delete previous Labels (When new candle opens or when replay mode, the labels were piling on)
+label.delete(label1[1])
+label.delete(label2[1]) 
 
 // Not compatible with my modifications for now----------
 
