@@ -3,6 +3,7 @@
 
 //@version=5
 indicator("MarketSmith Volumes", format = format.volume)
+prevC   = input(false, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
 trunc   = input(true, title="Truncate for MarketSmith type display", group = "DISPLAY")
 labels  = input(true, title="Labels on Volume", group = "DISPLAY")
 len     = input(50, "Length", group = "MA")
@@ -11,7 +12,10 @@ ticker  = syminfo.tickerid
 
 s       = ticker == "NSE:NIFTY" ? "NSE:NIFTY1!" : ticker == "NSE:BANKNIFTY" ? "NSE:BANKNIFTY1!" : ticker == "NSE:CNXFINANCE" ? "NSE:FINNIFTY1!" : ticker
 vol     = request.security(s, tf, volume)
-colr    = (close > open) ? color.new(#2736E9, 0) : color.new(#de32ae, 0)
+// Color of Volumes
+colr = close>open ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
+if(prevC)
+    colr := close>close[1] ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
 ma      = ta.sma(vol, len)
 
 // plot(vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
