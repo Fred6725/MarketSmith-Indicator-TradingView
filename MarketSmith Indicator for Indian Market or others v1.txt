@@ -1,0 +1,465 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// 
+
+//@version=5
+indicator("MarketSmith Indicator Indian Market", overlay=true)
+
+//------------------  BARS PART ---------------------//
+// Color of bars
+prevClose   = input(false, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
+colorCandle = close>open ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
+if(prevClose)
+    colorCandle := close>close[1] ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
+// Full Body (without border without wick)
+plotcandle(low, high, low, high, title='MarketSmith Bars', color = colorCandle, wickcolor = color.rgb(255,255,255,100), bordercolor = color.rgb(255,255,255,100), editable = true)
+// PlotChar - on close
+plotchar(close, char='-', location=location.absolute, size=size.small, color=colorCandle, editable = true)
+
+//------------------  SMA's PART ---------------------//
+// Input SMA for Daily TF and others
+iSma10    = input(true, title='MA 1',  group="----------SMAs----------", inline="sma10")
+iSmaV10   = input(10, title='Lenght',  group="----------SMAs----------", inline="sma10")
+iExp10    = input(true, title='Exponential',  group="----------SMAs----------", inline="sma10")
+iSma21    = input(true, title='MA 2',  group="----------SMAs----------", inline="sma21")
+iSmaV21   = input(21, title='Lenght',  group="----------SMAs----------", inline="sma21")
+iExp21    = input(true, title='Exponential',  group="----------SMAs----------", inline="sma21")
+iSma50    = input(true, title='MA 3',  group="----------SMAs----------", inline="sma50")
+iSmaV50   = input(50, title='Lenght',  group="----------SMAs----------", inline="sma50")
+iExp50    = input(false, title='Exponential',  group="----------SMAs----------", inline="sma50")
+iSma200   = input(true, title='MA 4', group="----------SMAs----------", inline="sma200")
+iSmaV200  = input(200, title='Lenght',  group="----------SMAs----------", inline="sma200")
+iExp200   = input(false, title='Exponential',  group="----------SMAs----------", inline="sma200")
+
+// Input SMA for Weekly TimeFrame
+iSma10We    = input(true, title='SMA 1',  group="----------SMAs We----------", inline="sma10We")
+iSmaV10We   = input(10, title='Lenght',  group="----------SMAs We----------", inline="sma10We")
+iExp10We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma10We")
+//iSorS10We   = input.string(defval ='SMA', title='MA 1', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="sma10We")
+iEma20We    = input(true, title='EMA 2',  group="----------SMAs We----------", inline="ema20We")
+iSmaV20We   = input(20, title='Lenght',  group="----------SMAs We----------", inline="ema20We")
+iExp20We    = input(true, title='Exponential',  group="----------SMAs We----------", inline="ema20We")
+//iSorS20We   = input.string(defval ='EMA', title='MA 2', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="ema20We")
+iSma30We    = input(true, title='SMA 3',  group="----------SMAs We----------", inline="sma30We")
+iSmaV30We   = input(30, title='Lenght',  group="----------SMAs We----------", inline="sma30We")
+iExp30We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma30We")
+//iSorS30We   = input.string(defval ='SMA', title='MA 3', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="sma30We")
+iSma40We    = input(true, title='SMA 4',  group="----------SMAs We----------", inline="sma40We")
+iSmaV40We   = input(40, title='Lenght',  group="----------SMAs We----------", inline="sma40We")
+iExp40We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma40We")
+//iSorS40We   = input.string(defval ='SMA', title='MA 4', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="sma40We")
+
+
+// SMA calculation Daily & others TF
+sma10  = iExp10  ? ta.ema(close,iSmaV10) :ta.sma(close,iSmaV10)
+sma21  = iExp21  ? ta.ema(close,iSmaV21) :ta.sma(close,iSmaV21)
+sma50  = iExp50  ? ta.ema(close,iSmaV50) :ta.sma(close,iSmaV50)
+sma200 = iExp200 ? ta.ema(close,iSmaV200):ta.sma(close,iSmaV200)
+
+// SMA calculation We
+sma10We  = iExp10We ? ta.ema(close,iSmaV10We):ta.sma(close,iSmaV10We)
+ema20We  = iExp20We ? ta.ema(close,iSmaV20We):ta.sma(close,iSmaV20We)
+sma30We  = iExp30We ? ta.ema(close,iSmaV30We):ta.sma(close,iSmaV30We)
+sma40We  = iExp40We ? ta.ema(close,iSmaV40We):ta.sma(close,iSmaV40We)
+
+// Ploting SMA/EMA Daily and other TF
+tfWeekly = timeframe.isweekly
+psma10  = plot(iSma10 and not tfWeekly ?  sma10:na,  linewidth=1, color=color.rgb(68,186,76))
+pema21  = plot(iSma21 and not tfWeekly ?  sma21:na,  linewidth=1, color=color.rgb(236,180,245,0))
+psma50  = plot(iSma50 and not tfWeekly ?  sma50:na,  linewidth=1, color=color.red)
+psma200 = plot(iSma200 and not tfWeekly ? sma200:na, linewidth=1, color=color.rgb(0,0,0,0))
+
+// Ploting SMA/EMA We
+psma10We =  plot(iSma10We and tfWeekly  ? sma10We:na, linewidth=1, color=color.red)
+pema20We =  plot(iEma20We and tfWeekly  ? ema20We:na, linewidth=1, color=color.rgb(240,141,240,0))
+psma30We =  plot(iSma30We and tfWeekly  ? sma30We:na, linewidth=1, color=color.rgb(102,144,78,0))
+psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=color.rgb(0,0,0,0))
+
+//------------------  RS Line Part  ---------------------// and // SP500 -> 0S&P5 //
+
+//Relative Price Strength (RS) Rating or Relative Strenght.
+//This is a measure of a stock's price performance over the last
+//twelve months, compared to all stocks in IBD's Database.
+//The rating scale ranges frome 1 (lowest) to 99 (highest)
+//At least this is the IBD proprietary rating's defintion.
+//Let's create an equivalent here for TradingView!
+//
+// © RaviYendru thanks for providing the intial script
+// Fred6724 - Let's see if it is possible to get better results
+
+hideRSRat   = input(false, title="Hide Rating", group = "Parameters", inline="0")
+seedetail   = input(false, title="Display the 2 results", group = "Parameters", inline="0")
+src         = close
+comparativeTickerId = input("NIFTY", title="Comparative Symbol", group = "Parameters")
+SpxValue    = input(17624, title="Value of Comparative Symbol", group = "Parameters")
+colorRS     = input(color.rgb(23, 20, 230), title = "Color of RS Line & Rating", group = "Parameters")
+//
+
+// If you want to change weight easily you can uncomment these inputs variable and comment the same non-input variable just below
+// SMA method
+// W1Ma        = input(40, title = "W1 %SMA", group = "Method 1", inline = "1")
+// W2Ma        = input(20, title = "W2", group = "Method 1", inline = "1")
+// W3Ma        = input(20, title = "W3 %SMA", group = "Method 1", inline = "2")
+// W4Ma        = input(20, title = "W4", group = "Method 1", inline = "2")
+//Classic perf method
+// W1P         = input(40, title = "W1 Perf", group = "Method 2", inline = "3")
+// W2P         = input(20, title = "W2", group = "Method 2", inline = "3")
+// W3P         = input(20, title = "W3 Perf", group = "Method 2", inline = "4")
+// W4P         = input(20, title = "W4", group = "Method 2", inline = "4")
+//Spx
+// spxW1Ma       = input(40, title = "W1 Comparative Perf", group = "Method 3", inline = "5")
+// spxW2Ma       = input(20, title = "W2", group = "Method 3", inline = "5")
+// spxW3Ma       = input(20, title = "W3 Comparative Perf", group = "Method 3", inline = "6")
+// spxW4Ma      = input(20, title = "W4", group = "Method 3", inline = "6")
+// Final
+// w1          = input(2, title = "Weight assigned for Method 1", group = "Final Calculation")
+// w2          = input(1, title = "Weight assigned for Method 2", group = "Final Calculation")
+// w3          = input(1, title = "Weight assigned for Method 3", group = "Final Calculation")
+
+// SMA method (not used for TASI)
+// W1Ma        = 40
+// W2Ma        = 20
+// W3Ma        = 20
+// W4Ma        = 20
+//Classic perf method
+W1P         = 40
+W2P         = 20
+W3P         = 20
+W4P         = 20
+//Spx
+spxW1Ma     = 40
+spxW2Ma     = 20
+spxW3Ma     = 20
+spxW4Ma     = 20
+// Final
+//w1          = 2
+w2          = 1
+w3          = 1
+
+
+// Comparative Ticker for RS Line
+// Line 15 is declared the input for the comparative ticker
+comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, close)
+// RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
+rs                  = src/comparativeSymbol * SpxValue*0.88   
+plot(rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+
+
+// New Calculation model -- EXPERIMENTAL
+// I will combine 3 methods
+// The first one will calculate how the stock behave vs SMA thanks to tickers showing % of stock above (200,150,100,50,20)
+// The second method will be an adaptation of the classic way that is provided to calculate RS Rating Perf close vs close 3M back (detail on the formula below)
+// The third will be a measure of how the stock perform against the comparative Symbol
+// For all these 3 techniques I will be using the formula delivered by IBD: RS Score = 40% * P3 + 20% * P6 + 20% * P9 + 20% * P12
+//
+// Finally I will try to calibrate the result for it to be at least relevant. I'm not aiming for 100% accuracy at all.
+// In fact considering the tools we have on tradingview this is not possible to be 100% accurate.
+// Don't hesitate to modify constants or calculation and try to find best results :) If you find a better result than me please contact me!
+
+
+// 1ST METHOD
+// Tickers I will use
+// MMTH - %Stock > 200 Da SMA
+// MMOF - %Stock > 150 Da SMA
+// MMOH - %Stock > 100 Da SMA
+// MMFI - %Stock > 50 Da SMA
+// MMTW - %Stock > 20 Da SMA
+// MMFD - %Stock > 5 Da SMA (more or less only noise, I won't use the 5 Daily SMA)
+
+//                 |Formula                     | Here I use this code to limite 75% up and 25% down regarding number of stock above SMA X
+// limitDown = 25                               // | This limitation will allow me to calculate a theorical max & min to limit the result to 99 & 1
+// limitUp   = 75
+// perStockAbove200 = request.security("MMTH", 'D', close) > limitUp ? limitUp:request.security("MMTH", 'D', close) < limitDown ? limitDown:request.security("MMTH", 'D', close)
+// perStockAbove150 = request.security("MMOF", 'D', close) > limitUp ? limitUp:request.security("MMOF", 'D', close) < limitDown ? limitDown:request.security("MMOF", 'D', close)
+// perStockAbove100 = request.security("MMOH", 'D', close) > limitUp ? limitUp:request.security("MMOH", 'D', close) < limitDown ? limitDown:request.security("MMOH", 'D', close)
+// perStockAbove50  = request.security("MMFI", 'D', close) > limitUp ? limitUp:request.security("MMFI", 'D', close) < limitDown ? limitDown:request.security("MMFI", 'D', close)
+// perStockAbove20  = request.security("MMTW", 'D', close) > limitUp ? limitUp:request.security("MMTW", 'D', close) < limitDown ? limitDown:request.security("MMTW", 'D', close)
+
+// The goal is to gather as much data as possible as we can't compare the score relatively to every other ticker. We do an approximation based on SMA and % of stock above them at X moment.
+closeDa = request.security(syminfo.tickerid, 'D', close)
+// SMA Declaration based on SMA Daily on the ticker we're watching
+// sma200 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,200))
+// sma150 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,150))
+// sma100 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,100))
+// sma50  = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,50))
+// sma20  = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,20))
+// Daily Close SPX500
+spxCloseDa = request.security(comparativeTickerId, 'D', close)
+// We save if we were above dedicated moving averages in a boolean variable
+// Reference point ticker
+// bCloseAbove200 = closeDa > sma200 ? 1:0
+// bCloseAbove150 = closeDa > sma150 ? 1:0
+// bCloseAbove100 = closeDa > sma100 ? 1:0
+// bCloseAbove50  = closeDa > sma50  ? 1:0
+// bCloseAbove20  = closeDa > sma20  ? 1:0
+// Refence 63 days back (3 months)
+// bClose63Above200 = closeDa[63] > sma200[63] ? 1:0
+// bClose63Above150 = closeDa[63] > sma150[63] ? 1:0
+// bClose63Above100 = closeDa[63] > sma100[63] ? 1:0
+// bClose63Above50  = closeDa[63] > sma50[63]  ? 1:0
+// bClose63Above20  = closeDa[63] > sma20[63]  ? 1:0
+// Refence 126 days back (6 months)
+// bClose126Above200 = closeDa[126] > sma200[126] ? 1:0
+// bClose126Above150 = closeDa[126] > sma150[126] ? 1:0
+// bClose126Above100 = closeDa[126] > sma100[126] ? 1:0
+// bClose126Above50  = closeDa[126] > sma50[126]  ? 1:0
+// bClose126Above20  = closeDa[126] > sma20[126]  ? 1:0
+// Refence 189 days back (9 months)
+// bClose189Above200 = closeDa[189] > sma200[189] ? 1:0
+// bClose189Above150 = closeDa[189] > sma150[189] ? 1:0
+// bClose189Above100 = closeDa[189] > sma100[189] ? 1:0
+// bClose189Above50  = closeDa[189] > sma50[189]  ? 1:0
+// bClose189Above20  = closeDa[189] > sma20[189]  ? 1:0
+// Refence 252 days back (12 months)
+// bClose252Above200 = closeDa[252] > sma200[252] ? 1:0
+// bClose252Above150 = closeDa[252] > sma150[252] ? 1:0
+// bClose252Above100 = closeDa[252] > sma100[252] ? 1:0
+// bClose252Above50  = closeDa[252] > sma50[252]  ? 1:0
+// bClose252Above20  = closeDa[252] > sma20[252]  ? 1:0
+// Calculation based on the formula: RS Score = 40% * P3 + 20% * P6 + 20% * P9 + 20% * P12
+// I choosed to calculate like this: if we were above this moving average when only 20% of stock were above, we get 1/0.20 = higher score because it is more noticeable.
+// The same when we are below the moving average whereas 80% of stocks are above, we loose the same amont with the formula 1/(1-0.8)
+// 0 MONTHS RS
+// zeroMonthSma200Weight = bCloseAbove200 ? 100/(perStockAbove200):-100/(100-perStockAbove200)
+// zeroMonthSma150Weight = bCloseAbove150 ? 100/(perStockAbove150):-100/(100-perStockAbove150)  // 100-X% because if the same logic applies if we are exceptionnaly weak 100/(100-75) = 4 vs 1.33
+// zeroMonthSma100Weight = bCloseAbove100 ? 100/(perStockAbove100):-100/(100-perStockAbove100)
+// zeroMonthSma50Weight  = bCloseAbove50  ? 100/(perStockAbove50 ):-100/(100-perStockAbove50 )
+// zeroMonthSma20Weight  = bCloseAbove20  ? 100/(perStockAbove20 ):-100/(100-perStockAbove20 )
+// zeroMonthWeight       = zeroMonthSma200Weight + zeroMonthSma150Weight + zeroMonthSma100Weight + zeroMonthSma50Weight + zeroMonthSma20Weight
+// 3 MONTHS RS 
+// threeMonthSma200Weight = bClose63Above200 ? 100/(perStockAbove200[63]):-100/(100-perStockAbove200[63])
+// threeMonthSma150Weight = bClose63Above150 ? 100/(perStockAbove150[63]):-100/(100-perStockAbove150[63])
+// threeMonthSma100Weight = bClose63Above100 ? 100/(perStockAbove100[63]):-100/(100-perStockAbove100[63])
+// threeMonthSma50Weight  = bClose63Above50  ? 100/(perStockAbove50[63] ):-100/(100-perStockAbove50[63] )
+// threeMonthSma20Weight  = bClose63Above20  ? 100/(perStockAbove20[63] ):-100/(100-perStockAbove20[63] )
+// threeMonthWeight       = threeMonthSma200Weight + threeMonthSma150Weight + threeMonthSma100Weight + threeMonthSma50Weight + threeMonthSma20Weight
+// 6 MONTHS RS
+// sixMonthSma200Weight = bClose126Above200 ? 100/(perStockAbove200[126]):-100/(100-perStockAbove200[126]) 
+// sixMonthSma150Weight = bClose126Above150 ? 100/(perStockAbove150[126]):-100/(100-perStockAbove150[126])
+// sixMonthSma100Weight = bClose126Above100 ? 100/(perStockAbove100[126]):-100/(100-perStockAbove100[126])
+// sixMonthSma50Weight  = bClose126Above50  ? 100/(perStockAbove50[126] ):-100/(100-perStockAbove50[126] )
+// sixMonthSma20Weight  = bClose126Above20  ? 100/(perStockAbove20[126] ):-100/(100-perStockAbove20[126] )
+// sixMonthWeight       = sixMonthSma200Weight + sixMonthSma150Weight + sixMonthSma100Weight + sixMonthSma50Weight + sixMonthSma20Weight
+// 9 MONTH RS
+// nineMonthSma200Weight = bClose189Above200 ? 100/(perStockAbove200[189]):-100/(100-perStockAbove200[189])   
+// nineMonthSma150Weight = bClose189Above150 ? 100/(perStockAbove150[189]):-100/(100-perStockAbove150[189])
+// nineMonthSma100Weight = bClose189Above100 ? 100/(perStockAbove100[189]):-100/(100-perStockAbove100[189])
+// nineMonthSma50Weight  = bClose189Above50  ? 100/(perStockAbove50[189] ):-100/(100-perStockAbove50[189] )
+// nineMonthSma20Weight  = bClose189Above20  ? 100/(perStockAbove20[189] ):-100/(100-perStockAbove20[189] )
+// nineMonthWeight       = nineMonthSma200Weight + nineMonthSma150Weight + nineMonthSma100Weight + nineMonthSma50Weight + nineMonthSma20Weight
+// 12 MONTH RS
+// twelveMonthSma200Weight = bClose252Above200 ? 100/(perStockAbove200[252]):-100/(100-perStockAbove200[252])
+// twelveMonthSma150Weight = bClose252Above150 ? 100/(perStockAbove150[252]):-100/(100-perStockAbove150[252])
+// twelveMonthSma100Weight = bClose252Above100 ? 100/(perStockAbove100[252]):-100/(100-perStockAbove100[252])
+// twelveMonthSma50Weight  = bClose252Above50  ? 100/(perStockAbove50[252] ):-100/(100-perStockAbove50[252] )
+// twelveMonthSma20Weight  = bClose252Above20  ? 100/(perStockAbove20[252] ):-100/(100-perStockAbove20[252] )
+// twelveMonthWeight       = twelveMonthSma200Weight + twelveMonthSma150Weight + twelveMonthSma100Weight + twelveMonthSma50Weight + twelveMonthSma20Weight
+// IBD's Formula for score without border (used to apply the cross product)
+//scoreWithoutBorder        =  W1Ma * (zeroMonthWeight + threeMonthWeight) + W2Ma * sixMonthWeight + W3Ma * nineMonthWeight + W4Ma * twelveMonthWeight
+// Calculation of theorical max and min scores (Truncated because results are very very arround 50-60 otherwise)
+// (The real formula of maxScore should be   maxScore =  W1Ma * (5*2*100/limitDown) + P2ma * (5*3*100/limitDown)  )
+// maxScore =  W1Ma * (2*100/limitDown) + W2Ma * (100/limitDown) + W3Ma * (100/limitDown) + W4Ma * (100/limitDown)
+// minScore = -(W1Ma * (2*100/(100-limitUp)) + W2Ma * (100/(100-limitUp)) +  W3Ma * (100/(100-limitUp)) + W4Ma * (100/(100-limitUp)) )
+// Formula for score without border adjusted (for the min value to be equals 1)
+// adjustedScoreWithoutBorder = scoreWithoutBorder - minScore + 1
+// adjustedMaxScore           = maxScore - minScore +1
+// adjustedMinScore           = minScore - minScore +1
+// Formula for score with border (cross product) - Result should not be greater than 99 and lower than 1 to this point
+//rsRating1 = math.round((adjustedScoreWithoutBorder)*99/(adjustedMaxScore-adjustedMinScore))
+// Rendering the result (results are mainly distributed at the middle so to get a better result I try to get a wider range by adding to good and removing to bad one)
+// Again results are distributed arround 1 to 75 so to get something linear I add to the score proportionally with their distance with 50 (only for better scores)
+// if(rsRating1>=50)
+//     truncate = (rsRating1-50)/2
+//     rsRating1 := math.round(rsRating1 + truncate)
+// if(rsRating1>99)
+//     rsRating1 := 99
+// if(rsRating1<1)
+//     rsRating1 := 1
+
+// 2nd METHOD - No modification except limitation to 100% to master the limit and fix it further to 99 and 1 (and also because -100 is the max)
+// Relative strength IBD style -> Initial Calculation against itslef
+limitPerf = 2  // +/- 100% limitation
+ThreeMthRS  = (closeDa/closeDa[63])
+if(closeDa < closeDa[63])
+    ThreeMthRS := -(1/ThreeMthRS) // to remove the same score than if this is a positive move
+if(ThreeMthRS > limitPerf)
+    ThreeMthRS := limitPerf
+if(ThreeMthRS < -limitPerf)
+    ThreeMthRS := -limitPerf
+SixMthRS    = (closeDa/closeDa[126])
+if(closeDa < closeDa[126])
+    SixMthRS := -(1/SixMthRS)
+if(SixMthRS > limitPerf)
+    SixMthRS := limitPerf
+if(SixMthRS < -limitPerf)
+    SixMthRS := -limitPerf
+NineMthRS   = (closeDa/closeDa[189])
+if(closeDa < closeDa[189])
+    NineMthRS := -(1/NineMthRS)
+if(NineMthRS > limitPerf)
+    NineMthRS := limitPerf
+if(NineMthRS < -limitPerf)
+    NineMthRS := -limitPerf
+TwelveMthRS = (closeDa/closeDa[252])
+if(closeDa < closeDa[252])
+    TwelveMthRS := -(1/TwelveMthRS)
+if(TwelveMthRS > limitPerf)
+    TwelveMthRS := limitPerf
+if(TwelveMthRS < -limitPerf)
+    TwelveMthRS := -limitPerf
+// Calculation of theorical max and min scores
+maxScore2 = limitPerf*W1P + limitPerf*W2P + limitPerf*W3P + limitPerf*W4P
+minScore2 = -limitPerf*W1P - limitPerf*W2P - limitPerf*W3P - limitPerf*W4P
+// Calulation of Score
+RSraw = W1P * ThreeMthRS + W2P * SixMthRS + W3P * NineMthRS + W4P * TwelveMthRS
+// Adjustment (used to apply the cross product)
+adjustedPerfScoreWithoutBorder = RSraw - minScore2 + 1
+adjustedPerfMaxScore           = maxScore2 - minScore2 + 1
+adjustedPerfMinScore           = minScore2 - minScore2 + 1
+// Formula for score with border (cross product)
+rsRating2 = math.round((adjustedPerfScoreWithoutBorder)*99/(adjustedPerfMaxScore-adjustedPerfMinScore))
+// Rendering the result
+if(rsRating2>=50)
+    truncate = (rsRating2-50)/2
+    rsRating2 := math.round(rsRating2 + truncate)
+if(rsRating2>99)
+    rsRating2 := 99
+if(rsRating2<1)
+    rsRating2 := 1
+
+
+
+// 3RD METHODE
+// I was running the average of both precedent results and... I found it was actually not that bad!
+// But something was missing, a score for relative strenght against the SPX500.
+// Let's do it
+// Here I wanted to compare perf of ticker vs perf of spx500
+// Limited at 100% of original calculation (I use a limit to determine maxscore and minscore and not go above 99 or under 1)
+perfTicker63  = closeDa/closeDa[63]
+perfComp63    = spxCloseDa/spxCloseDa[63]
+perfTicker126 = closeDa/closeDa[126]
+perfComp126   = spxCloseDa/spxCloseDa[126]
+perfTicker189 = closeDa/closeDa[189]
+perfComp189   = spxCloseDa/spxCloseDa[189]
+perfTicker252 = closeDa/closeDa[252]
+perfComp252   = spxCloseDa/spxCloseDa[252]
+// Calculation of relative/comparative performance
+limiteComp = 2 // +/- 100% limitation
+spxThreeMthRS  = ( perfTicker63/perfComp63 )
+if(perfTicker63 < perfComp63)
+    spxThreeMthRS := -(1/spxThreeMthRS)
+if(spxThreeMthRS > limiteComp)
+    spxThreeMthRS := limiteComp
+if(spxThreeMthRS < -limiteComp)
+    spxThreeMthRS := -limiteComp
+spxSixMthRS    = ( perfTicker126/perfComp126 )
+if(perfTicker126 < perfComp126)
+    spxSixMthRS := -(1/spxSixMthRS)
+if(spxSixMthRS > limiteComp)
+    spxSixMthRS := limiteComp
+if(spxSixMthRS < -limiteComp)
+    spxSixMthRS := -limiteComp
+spxNineMthRS   = (perfTicker189/perfComp189)
+if(perfTicker189 < perfComp189)
+    spxNineMthRS := -(1/spxNineMthRS)
+if(spxNineMthRS > limiteComp)
+    spxNineMthRS := limiteComp
+if(spxNineMthRS < -limiteComp)
+    spxNineMthRS := -limiteComp
+spxTwelveMthRS = ( perfTicker252/perfComp252 )
+if(perfTicker252 < perfComp252)
+    spxTwelveMthRS := -(1/spxTwelveMthRS)
+if(spxTwelveMthRS > limiteComp)
+    spxTwelveMthRS := limiteComp
+if(spxTwelveMthRS < -limiteComp)
+    spxTwelveMthRS := -limiteComp
+// Calculation of theorical max and min scores
+spxMaxScore2 = limiteComp*spxW1Ma + limiteComp*spxW2Ma + limiteComp*spxW3Ma + limiteComp*spxW4Ma
+spxMinScore2 = -limiteComp*spxW1Ma - limiteComp*spxW2Ma - limiteComp*spxW3Ma - limiteComp*spxW4Ma
+// Calulation of Score
+spxRSraw = spxW1Ma * spxThreeMthRS + spxW2Ma * spxSixMthRS + spxW3Ma * spxNineMthRS + spxW4Ma * spxTwelveMthRS
+// Adjustment (used to apply the cross product)
+spxAdjustedPerfScoreWithoutBorder = spxRSraw - spxMinScore2 + 1
+spxAdjustedPerfMaxScore           = spxMaxScore2 - spxMinScore2 + 1
+spxAdjustedPerfMinScore           = spxMinScore2 - spxMinScore2 + 1
+// Formula for score with border (cross product)
+rsRating3 = math.round((spxAdjustedPerfScoreWithoutBorder)*99/(spxAdjustedPerfMaxScore-spxAdjustedPerfMinScore))
+// Combination of both systems (w1, w2, are weight to give to the 3 methods)
+float totalRsRating = math.round((w2 * rsRating2 + w3 * rsRating3) / (w2 + w3))  // Combining the 3 methods
+
+// Score adjustment based on observation among vaste amount of examples against IBD's ranking
+// This is handiwork, if you want to work on improving the code you should remove this part
+// if(rsRating3<45 and rsRating3<rsRating1 and rsRating3<rsRating2) // When we have a great historic score, a great performance but a poor relative strenght, most of the time the rating decrease
+//     totalRsRating := math.round((w2 * rsRating2 + w3 * rsRating3) / (w2 + w3))
+// if(rsRating2>80 and rsRating1<70 and rsRating3>=68)// Many time when the stock is beaten down but have a huge momentum, this rating is down 20-30 points.
+//     totalRsRating := rsRating2-1                   // so we modify the score in this case to take into consideration only the RS Score which is usually not that bad alone at this moment
+// if(rsRating2>=59 and rsRating1<=30 and rsRating3>=50)// Many time when the stock is beaten down but have a huge/correct momentum, this rating is down 20-30 points.
+//     totalRsRating := rsRating2-1                     // And very often the RsRating is the closer to the final result
+// if(rsRating1>=80 and rsRating2>=49 and rsRating2<=65 and rsRating3<=45 and rsRating3>=33 and rsRating2-rsRating3>=6) // Sometimes when rsRating 2 & 3 are in between a given range, results seems OK. Exception here
+//     totalRsRating := math.round((w1 * rsRating1 + w2 * rsRating2 + w3 * rsRating3) / (w1 + w2 + w3 ))            // due to the first adjustment but still the first enhances and the second two
+
+
+// Display the RS Rating
+// Results are only acceptable in Daily TimeFrame
+isDaily = timeframe.isdaily
+labelText1 = "RS Rating"
+labelText2 = "\n\n"+str.tostring(totalRsRating,"#0")
+if(seedetail)
+    if(isDaily)
+        labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")+ " (" + str.tostring(rsRating2,"#0")+" | "+str.tostring(rsRating3,"#0")+")"
+    else
+        labelText2 := ""
+else
+    if(isDaily)
+        labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")
+    else
+        labelText2 := ""
+label1 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText1 , color = color.rgb(0,0,0,100), size=size.normal, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
+label2 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText2 , color = color.rgb(0,0,0,100), size=size.large, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
+
+// Delete previous Labels (When new candle opens or when replay mode, the labels were piling on)
+label.delete(label1[1])
+label.delete(label2[1]) 
+
+// Not compatible with my modifications for now----------
+
+//For 4 Year high and low on weekly the value is 244, For 52 week the value can be set as 52 and accordingly
+// Barsback  = input(233,title="No of Bars Back")
+// // calcs high x number days back
+// hb = highestbars(rs, Barsback)
+// // calcs low x number days back
+// lb = lowestbars(rs, Barsback)
+
+// // I remove the dot for the moment because when we modify the scale they aren't stick on the rs line
+// //plots shape on chart at high - Green Dot
+// if(hb!=hb[1])
+//     label.new()
+// plotshape(hb, title = "High", location= location.top, color=#0066ff , offset=hb, size = size.tiny, show_last=1, style=shape.circle)
+// //plots shape on chart at low - Red Dot
+// plotshape(lb, title = "Low", location= location.bottom, color=#ff0000 , offset=lb, size = size.tiny, show_last=1, style=shape.circle)
+
+
+
+
+
+//------------------  Markerd Highs and Lows  ---------------------//
+
+// Price Peak/Valley Points
+// Highlights exact price at high or low points over a 19-period interval.
+// For example, on a Daily chart, a High Price point is marked on the date
+// where there has been no higher price the 9 days prior to that date and
+// the 9 days following that date.
+
+// Fuck it :')
+// High Price Point
+i_displayHL = input(true, title="Display H/L Points", group="----------High/Low Price Points----------")
+i_colorHL   = input(color.rgb(0,0,0,0), title='Labels Color', group="----------High/Low Price Points----------")
+if(i_displayHL)
+    pivotHigh      = ta.pivothigh(high, 9, 9)
+    if (pivotHigh)
+        textHigh9  = str.tostring(high[9], '0.00')
+        highestHigh = label.new(bar_index-9, high[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textHigh9, textcolor=i_colorHL)
+    // Low Price Point
+    pivotLow       = ta.pivotlow(low, 9, 9)
+    if (pivotLow)
+        textLow9  = str.tostring(low[9], '0.00')
+        lowestLow  = label.new(bar_index-9, low[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n" + textLow9, textcolor=i_colorHL, color=color.rgb(0,0,0,100))
