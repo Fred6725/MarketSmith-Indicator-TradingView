@@ -424,19 +424,14 @@ label.delete(label2[1])
 // Fuck it :')
 // High Price Point
 i_displayHL = input(true, title="Display H/L Points", group="----------High/Low Price Points----------")
-if(not timeframe.isweekly and i_displayHL)
-    // condHighPricePointBefore = high[10] > high[11] and high[10] > high[12] and high[10] > high[13] and high[10] > high[14] and high[10] > high[15] and high[10] > high[16] and high[10] > high[17] and high[10] > high[18] and high[10] > high[19]
-    // condHighPricePointAfter  = high[10] > high[9] and high[10] > high[8] and high[10] > high[7] and high[10] > high[6] and high[10] > high[5] and high[10] > high[4] and high[10] > high[3] and high[10] > high[2] and high[10] > high[1]
-    condHighPricePointBefore = high[9] >= high[10] and high[9] >= high[11] and high[9] >= high[12] and high[9] >= high[13] and high[9] >= high[14] and high[9] >= high[15] and high[9] >= high[16] and high[9] >= high[17] and high[9] >= high[18]
-    condHighPricePointAfter  = high[9] > high[8] and high[9] > high[7] and high[9] > high[6] and high[9] > high[5] and high[9] > high[4] and high[9] > high[3] and high[9] > high[2] and high[9] > high[1] and high[9] > high
-    condHighPricePoint       = condHighPricePointBefore and condHighPricePointAfter
-    if (condHighPricePoint)
+i_colorHL   = input(color.rgb(0,0,0,0), title='Labels Color', group="----------High/Low Price Points----------")
+if(i_displayHL)
+    pivotHigh      = ta.pivothigh(high, 9, 9)
+    if (pivotHigh)
         textHigh9  = str.tostring(high[9], '0.00')
-        highestHigh = label.new(bar_index-9, high[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textHigh9, textcolor=color.rgb(0,0,0,0))
+        highestHigh = label.new(bar_index-9, high[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textHigh9, textcolor=i_colorHL)
     // Low Price Point
-    condLowPricePointBefore = low[9] <= low[10] and low[9] <= low[11] and low[9] <= low[12] and low[9] <= low[13] and low[9] <= low[14] and low[9] <= low[15] and low[9] <= low[16] and low[9] <= low[17] and low[9] <= low[18]
-    condLowPricePointAfter  = low[9] < low[8] and low[9] < low[7] and low[9] < low[6] and low[9] < low[5] and low[9] < low[4] and low[9] < low[3] and low[9] < low[2] and low[9] < low[1] and low[9] < low
-    condLowPricePoint       = condLowPricePointBefore and condLowPricePointAfter
-    if (condLowPricePoint)
+    pivotLow       = ta.pivotlow(low, 9, 9)
+    if (pivotLow)
         textLow9  = str.tostring(low[9], '0.00')
-        lowestLow  = label.new(bar_index-9, low[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n" + textLow9, textcolor=color.rgb(0,0,0,0), color=color.rgb(0,0,0,100))
+        lowestLow  = label.new(bar_index-9, low[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n" + textLow9, textcolor=i_colorHL, color=color.rgb(0,0,0,100))
