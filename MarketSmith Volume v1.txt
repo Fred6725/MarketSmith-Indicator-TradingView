@@ -45,10 +45,8 @@ plot(ma, title = "MA", color = color.red)
 
 // High Price Point
 if(timeframe.isdaily and labels)
-    condvolPricePointBefore = vol[9] >= vol[10] and vol[9] >= vol[11] and vol[9] >= vol[12] and vol[9] >= vol[13] and vol[9] >= vol[14] and vol[9] >= vol[15] and vol[9] >= vol[16] and vol[9] >= vol[17] and vol[9] >= vol[18]
-    condvolPricePointAfter  = vol[9] > vol[8] and vol[9] > vol[7] and vol[9] > vol[6] and vol[9] > vol[5] and vol[9] > vol[4] and vol[9] > vol[3] and vol[9] > vol[2] and vol[9] > vol[1] and vol[9] > vol
-    condvolPricePoint       = condvolPricePointBefore and condvolPricePointAfter
-    if (condvolPricePoint)
+    pivotHigh      = ta.pivothigh(volume, 9, 9)
+    if (pivotHigh)
         textvol9 = str.tostring(vol[9]/1000000, '0.0')+'M'
         if(vol >= 1000000000)
             textvol9 := str.tostring(vol[9]/1000000000, '0.0')+'B'
