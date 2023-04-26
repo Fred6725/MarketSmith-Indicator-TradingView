@@ -6,7 +6,7 @@ indicator("MarketSmith Indicator", overlay=true)
 
 //------------------  BARS PART ---------------------//
 // Color of bars
-prevClose   = input(false, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
+prevClose   = input(true, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
 colorCandle = close>open ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
 if(prevClose)
     colorCandle := close>close[1] ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
@@ -421,11 +421,10 @@ label.delete(label2[1])
 // where there has been no higher price the 9 days prior to that date and
 // the 9 days following that date.
 
-// Fuck it :')
 // High Price Point
 i_displayHL = input(true, title="Display H/L Points", group="----------High/Low Price Points----------")
 i_colorHL   = input(color.rgb(0,0,0,0), title='Labels Color', group="----------High/Low Price Points----------")
-if(i_displayHL)
+if(i_displayHL and not timeframe.isweekly)
     pivotHigh      = ta.pivothigh(high, 9, 9)
     if (pivotHigh)
         textHigh9  = str.tostring(high[9], '0.00')
