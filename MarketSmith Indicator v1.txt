@@ -86,13 +86,13 @@ psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=color.r
 // © RaviYendru thanks for providing the intial script
 // Fred6724 - Let's see if it is possible to get better results
 
-
-hideRSRat   = input(false, title="Hide Rating", group = "Parameters", inline="0")
+hideRSLine  = input(false, title="Hide RS Line", group="----------RS Rating----------", inline="0")
+hideRSRat   = input(false, title="Hide Rating", group = "----------RS Rating----------", inline="0")
 //seedetail   = input(false, title="Display the 3 results", group = "Parameters", inline="0")
 src         = close
-comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "Parameters")
-SpxValue    = input(3900, title="Value of Comparative Symbol", group = "Parameters")
-colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "Parameters")
+comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------")
+SpxValue    = input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------")
+colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "----------RS Rating----------")
 //
 
 // If you want to change weight easily you can uncomment these inputs variable and comment the same non-input variable just below
@@ -148,7 +148,7 @@ n252     = barIndex < 252 ? barIndex : 252
 comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, close)
 // RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
 rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80 
-plot(rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+plot(hideRSLine ? na:rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
 
 
 // New Calculation model -- EXPERIMENTAL
