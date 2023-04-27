@@ -85,13 +85,36 @@ psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=color.r
 //
 // © RaviYendru thanks for providing the intial script
 // Fred6724 - Let's see if it is possible to get better results
-hideRSLine  = input(false, title="Hide RS Line", group="----------RS Rating----------", inline="0")
-hideRSRat   = input(false, title="Hide RS Rating", group = "----------RS Rating----------", inline="0")
-src         = close
-comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------")
-SpxValue    = input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------")
-colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "----------RS Rating----------")
 
+
+hideRSRat   = input(false, title="Hide Rating", group = "Parameters", inline="0")
+//seedetail   = input(false, title="Display the 3 results", group = "Parameters", inline="0")
+src         = close
+comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "Parameters")
+SpxValue    = input(3900, title="Value of Comparative Symbol", group = "Parameters")
+colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "Parameters")
+//
+
+// If you want to change weight easily you can uncomment these inputs variable and comment the same non-input variable just below
+// SMA method
+// W1Ma        = input(40, title = "W1 %SMA", group = "Method 1", inline = "1")
+// W2Ma        = input(20, title = "W2", group = "Method 1", inline = "1")
+// W3Ma        = input(20, title = "W3 %SMA", group = "Method 1", inline = "2")
+// W4Ma        = input(20, title = "W4", group = "Method 1", inline = "2")
+//Classic perf method
+// W1P         = input(40, title = "W1 Perf", group = "Method 2", inline = "3")
+// W2P         = input(20, title = "W2", group = "Method 2", inline = "3")
+// W3P         = input(20, title = "W3 Perf", group = "Method 2", inline = "4")
+// W4P         = input(20, title = "W4", group = "Method 2", inline = "4")
+//Spx
+// spxW1Ma       = input(40, title = "W1 Comparative Perf", group = "Method 3", inline = "5")
+// spxW2Ma       = input(20, title = "W2", group = "Method 3", inline = "5")
+// spxW3Ma       = input(20, title = "W3 Comparative Perf", group = "Method 3", inline = "6")
+// spxW4Ma      = input(20, title = "W4", group = "Method 3", inline = "6")
+// Final
+// w1          = input(2, title = "Weight assigned for Method 1", group = "Final Calculation")
+// w2          = input(1, title = "Weight assigned for Method 2", group = "Final Calculation")
+// w3          = input(1, title = "Weight assigned for Method 3", group = "Final Calculation")
 
 // SMA method
 W1Ma        = 40
@@ -112,15 +135,20 @@ spxW4Ma     = 20
 w1          = 2
 w2          = 1
 w3          = 1
+// Using bar index in case of IPO for avoiding NaN results
+barIndex = bar_index
+n63      = barIndex < 63  ? barIndex : 63
+n126     = barIndex < 126 ? barIndex : 126
+n189     = barIndex < 189 ? barIndex : 189
+n252     = barIndex < 252 ? barIndex : 252
 
 
 // Comparative Ticker for RS Line
 // Line 15 is declared the input for the comparative ticker
 comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, close)
-//plot(comparativeSymbol*1.2*kclose/3900, color=color.rgb(0,0,0,0))
 // RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
-rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80
-plot(hideRSLine ? na:rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80 
+plot(rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
 
 
 // New Calculation model -- EXPERIMENTAL
@@ -171,29 +199,29 @@ bCloseAbove100 = closeDa > sma100 ? 1:0
 bCloseAbove50  = closeDa > sma50_2  ? 1:0
 bCloseAbove20  = closeDa > sma20  ? 1:0
 // Refence 63 days back (3 months)
-bClose63Above200 = closeDa[63] > sma200_2[63] ? 1:0
-bClose63Above150 = closeDa[63] > sma150[63] ? 1:0
-bClose63Above100 = closeDa[63] > sma100[63] ? 1:0
-bClose63Above50  = closeDa[63] > sma50_2[63]  ? 1:0
-bClose63Above20  = closeDa[63] > sma20[63]  ? 1:0
+bClose63Above200 = closeDa[n63] > sma200_2[n63] ? 1:0
+bClose63Above150 = closeDa[n63] > sma150[n63] ? 1:0
+bClose63Above100 = closeDa[n63] > sma100[n63] ? 1:0
+bClose63Above50  = closeDa[n63] > sma50_2[n63]  ? 1:0
+bClose63Above20  = closeDa[n63] > sma20[n63]  ? 1:0
 // Refence 126 days back (6 months)
-bClose126Above200 = closeDa[126] > sma200_2[126] ? 1:0
-bClose126Above150 = closeDa[126] > sma150[126] ? 1:0
-bClose126Above100 = closeDa[126] > sma100[126] ? 1:0
-bClose126Above50  = closeDa[126] > sma50_2[126]  ? 1:0
-bClose126Above20  = closeDa[126] > sma20[126]  ? 1:0
+bClose126Above200 = closeDa[n126] > sma200_2[n126] ? 1:0
+bClose126Above150 = closeDa[n126] > sma150[n126] ? 1:0
+bClose126Above100 = closeDa[n126] > sma100[n126] ? 1:0
+bClose126Above50  = closeDa[n126] > sma50_2[n126]  ? 1:0
+bClose126Above20  = closeDa[n126] > sma20[n126]  ? 1:0
 // Refence 189 days back (9 months)
-bClose189Above200 = closeDa[189] > sma200_2[189] ? 1:0
-bClose189Above150 = closeDa[189] > sma150[189] ? 1:0
-bClose189Above100 = closeDa[189] > sma100[189] ? 1:0
-bClose189Above50  = closeDa[189] > sma50_2[189]  ? 1:0
-bClose189Above20  = closeDa[189] > sma20[189]  ? 1:0
+bClose189Above200 = closeDa[n189] > sma200_2[n189] ? 1:0
+bClose189Above150 = closeDa[n189] > sma150[n189] ? 1:0
+bClose189Above100 = closeDa[n189] > sma100[n189] ? 1:0
+bClose189Above50  = closeDa[n189] > sma50_2[n189]  ? 1:0
+bClose189Above20  = closeDa[n189] > sma20[n189]  ? 1:0
 // Refence 252 days back (12 months)
-bClose252Above200 = closeDa[252] > sma200_2[252] ? 1:0
-bClose252Above150 = closeDa[252] > sma150[252] ? 1:0
-bClose252Above100 = closeDa[252] > sma100[252] ? 1:0
-bClose252Above50  = closeDa[252] > sma50_2[252]  ? 1:0
-bClose252Above20  = closeDa[252] > sma20[252]  ? 1:0
+bClose252Above200 = closeDa[n252] > sma200_2[n252] ? 1:0
+bClose252Above150 = closeDa[n252] > sma150[n252] ? 1:0
+bClose252Above100 = closeDa[n252] > sma100[n252] ? 1:0
+bClose252Above50  = closeDa[n252] > sma50_2[n252]  ? 1:0
+bClose252Above20  = closeDa[n252] > sma20[n252]  ? 1:0
 // Calculation based on the formula: RS Score = 40% * P3 + 20% * P6 + 20% * P9 + 20% * P12
 // I choosed to calculate like this: if we were above this moving average when only 20% of stock were above, we get 1/0.20 = higher score because it is more noticeable.
 // The same when we are below the moving average whereas 80% of stocks are above, we loose the same amont with the formula 1/(1-0.8)
@@ -205,32 +233,32 @@ zeroMonthsma50_2Weight  = bCloseAbove50  ? 100/(perStockAbove50 ):-100/(100-perS
 zeroMonthSma20Weight  = bCloseAbove20  ? 100/(perStockAbove20 ):-100/(100-perStockAbove20 )
 zeroMonthWeight       = zeroMonthsma200_2Weight + zeroMonthSma150Weight + zeroMonthSma100Weight + zeroMonthsma50_2Weight + zeroMonthSma20Weight
 // 3 MONTHS RS 
-threeMonthsma200_2Weight = bClose63Above200 ? 100/(perStockAbove200[63]):-100/(100-perStockAbove200[63])
-threeMonthSma150Weight = bClose63Above150 ? 100/(perStockAbove150[63]):-100/(100-perStockAbove150[63])
-threeMonthSma100Weight = bClose63Above100 ? 100/(perStockAbove100[63]):-100/(100-perStockAbove100[63])
-threeMonthsma50_2Weight  = bClose63Above50  ? 100/(perStockAbove50[63] ):-100/(100-perStockAbove50[63] )
-threeMonthSma20Weight  = bClose63Above20  ? 100/(perStockAbove20[63] ):-100/(100-perStockAbove20[63] )
+threeMonthsma200_2Weight = bClose63Above200 ? 100/(perStockAbove200[n63]):-100/(100-perStockAbove200[n63])
+threeMonthSma150Weight = bClose63Above150 ? 100/(perStockAbove150[n63]):-100/(100-perStockAbove150[n63])
+threeMonthSma100Weight = bClose63Above100 ? 100/(perStockAbove100[n63]):-100/(100-perStockAbove100[n63])
+threeMonthsma50_2Weight  = bClose63Above50  ? 100/(perStockAbove50[n63] ):-100/(100-perStockAbove50[n63] )
+threeMonthSma20Weight  = bClose63Above20  ? 100/(perStockAbove20[n63] ):-100/(100-perStockAbove20[n63] )
 threeMonthWeight       = threeMonthsma200_2Weight + threeMonthSma150Weight + threeMonthSma100Weight + threeMonthsma50_2Weight + threeMonthSma20Weight
 // 6 MONTHS RS
-sixMonthsma200_2Weight = bClose126Above200 ? 100/(perStockAbove200[126]):-100/(100-perStockAbove200[126]) 
-sixMonthSma150Weight = bClose126Above150 ? 100/(perStockAbove150[126]):-100/(100-perStockAbove150[126])
-sixMonthSma100Weight = bClose126Above100 ? 100/(perStockAbove100[126]):-100/(100-perStockAbove100[126])
-sixMonthsma50_2Weight  = bClose126Above50  ? 100/(perStockAbove50[126] ):-100/(100-perStockAbove50[126] )
-sixMonthSma20Weight  = bClose126Above20  ? 100/(perStockAbove20[126] ):-100/(100-perStockAbove20[126] )
+sixMonthsma200_2Weight = bClose126Above200 ? 100/(perStockAbove200[n126]):-100/(100-perStockAbove200[n126]) 
+sixMonthSma150Weight = bClose126Above150 ? 100/(perStockAbove150[n126]):-100/(100-perStockAbove150[n126])
+sixMonthSma100Weight = bClose126Above100 ? 100/(perStockAbove100[n126]):-100/(100-perStockAbove100[n126])
+sixMonthsma50_2Weight  = bClose126Above50  ? 100/(perStockAbove50[n126] ):-100/(100-perStockAbove50[n126] )
+sixMonthSma20Weight  = bClose126Above20  ? 100/(perStockAbove20[n126] ):-100/(100-perStockAbove20[n126] )
 sixMonthWeight       = sixMonthsma200_2Weight + sixMonthSma150Weight + sixMonthSma100Weight + sixMonthsma50_2Weight + sixMonthSma20Weight
 // 9 MONTH RS
-nineMonthsma200_2Weight = bClose189Above200 ? 100/(perStockAbove200[189]):-100/(100-perStockAbove200[189])   
-nineMonthSma150Weight = bClose189Above150 ? 100/(perStockAbove150[189]):-100/(100-perStockAbove150[189])
-nineMonthSma100Weight = bClose189Above100 ? 100/(perStockAbove100[189]):-100/(100-perStockAbove100[189])
-nineMonthsma50_2Weight  = bClose189Above50  ? 100/(perStockAbove50[189] ):-100/(100-perStockAbove50[189] )
-nineMonthSma20Weight  = bClose189Above20  ? 100/(perStockAbove20[189] ):-100/(100-perStockAbove20[189] )
+nineMonthsma200_2Weight = bClose189Above200 ? 100/(perStockAbove200[n189]):-100/(100-perStockAbove200[n189])   
+nineMonthSma150Weight = bClose189Above150 ? 100/(perStockAbove150[n189]):-100/(100-perStockAbove150[n189])
+nineMonthSma100Weight = bClose189Above100 ? 100/(perStockAbove100[n189]):-100/(100-perStockAbove100[n189])
+nineMonthsma50_2Weight  = bClose189Above50  ? 100/(perStockAbove50[n189] ):-100/(100-perStockAbove50[n189] )
+nineMonthSma20Weight  = bClose189Above20  ? 100/(perStockAbove20[n189] ):-100/(100-perStockAbove20[n189] )
 nineMonthWeight       = nineMonthsma200_2Weight + nineMonthSma150Weight + nineMonthSma100Weight + nineMonthsma50_2Weight + nineMonthSma20Weight
 // 12 MONTH RS
-twelveMonthsma200_2Weight = bClose252Above200 ? 100/(perStockAbove200[252]):-100/(100-perStockAbove200[252])
-twelveMonthSma150Weight = bClose252Above150 ? 100/(perStockAbove150[252]):-100/(100-perStockAbove150[252])
-twelveMonthSma100Weight = bClose252Above100 ? 100/(perStockAbove100[252]):-100/(100-perStockAbove100[252])
-twelveMonthsma50_2Weight  = bClose252Above50  ? 100/(perStockAbove50[252] ):-100/(100-perStockAbove50[252] )
-twelveMonthSma20Weight  = bClose252Above20  ? 100/(perStockAbove20[252] ):-100/(100-perStockAbove20[252] )
+twelveMonthsma200_2Weight = bClose252Above200 ? 100/(perStockAbove200[n252]):-100/(100-perStockAbove200[n252])
+twelveMonthSma150Weight = bClose252Above150 ? 100/(perStockAbove150[n252]):-100/(100-perStockAbove150[n252])
+twelveMonthSma100Weight = bClose252Above100 ? 100/(perStockAbove100[n252]):-100/(100-perStockAbove100[n252])
+twelveMonthsma50_2Weight  = bClose252Above50  ? 100/(perStockAbove50[n252] ):-100/(100-perStockAbove50[n252] )
+twelveMonthSma20Weight  = bClose252Above20  ? 100/(perStockAbove20[n252] ):-100/(100-perStockAbove20[n252] )
 twelveMonthWeight       = twelveMonthsma200_2Weight + twelveMonthSma150Weight + twelveMonthSma100Weight + twelveMonthsma50_2Weight + twelveMonthSma20Weight
 // IBD's Formula for score without border (used to apply the cross product)
 scoreWithoutBorder        =  W1Ma * (zeroMonthWeight + threeMonthWeight) + W2Ma * sixMonthWeight + W3Ma * nineMonthWeight + W4Ma * twelveMonthWeight
@@ -257,29 +285,29 @@ if(rsRating1<1)
 // 2nd METHOD - No modification except limitation to 100% to master the limit and fix it further to 99 and 1 (and also because -100 is the max)
 // Relative strength IBD style -> Initial Calculation against itslef
 limitPerf = 2  // +/- 100% limitation
-ThreeMthRS  = (closeDa/closeDa[63])
-if(closeDa < closeDa[63])
+ThreeMthRS  = (closeDa/closeDa[n63])
+if(closeDa < closeDa[n63])
     ThreeMthRS := -(1/ThreeMthRS) // to remove the same score than if this is a positive move
 if(ThreeMthRS > limitPerf)
     ThreeMthRS := limitPerf
 if(ThreeMthRS < -limitPerf)
     ThreeMthRS := -limitPerf
-SixMthRS    = (closeDa/closeDa[126])
-if(closeDa < closeDa[126])
+SixMthRS    = (closeDa/closeDa[n126])
+if(closeDa < closeDa[n126])
     SixMthRS := -(1/SixMthRS)
 if(SixMthRS > limitPerf)
     SixMthRS := limitPerf
 if(SixMthRS < -limitPerf)
     SixMthRS := -limitPerf
-NineMthRS   = (closeDa/closeDa[189])
-if(closeDa < closeDa[189])
+NineMthRS   = (closeDa/closeDa[n189])
+if(closeDa < closeDa[n189])
     NineMthRS := -(1/NineMthRS)
 if(NineMthRS > limitPerf)
     NineMthRS := limitPerf
 if(NineMthRS < -limitPerf)
     NineMthRS := -limitPerf
-TwelveMthRS = (closeDa/closeDa[252])
-if(closeDa < closeDa[252])
+TwelveMthRS = (closeDa/closeDa[n252])
+if(closeDa < closeDa[n252])
     TwelveMthRS := -(1/TwelveMthRS)
 if(TwelveMthRS > limitPerf)
     TwelveMthRS := limitPerf
@@ -313,14 +341,14 @@ if(rsRating2<1)
 // Let's do it
 // Here I wanted to compare perf of ticker vs perf of spx500
 // Limited at 100% of original calculation (I use a limit to determine maxscore and minscore and not go above 99 or under 1)
-perfTicker63  = closeDa/closeDa[63]
-perfComp63    = spxCloseDa/spxCloseDa[63]
-perfTicker126 = closeDa/closeDa[126]
-perfComp126   = spxCloseDa/spxCloseDa[126]
-perfTicker189 = closeDa/closeDa[189]
-perfComp189   = spxCloseDa/spxCloseDa[189]
-perfTicker252 = closeDa/closeDa[252]
-perfComp252   = spxCloseDa/spxCloseDa[252]
+perfTicker63  = closeDa/closeDa[n63]
+perfComp63    = spxCloseDa/spxCloseDa[n63]
+perfTicker126 = closeDa/closeDa[n126]
+perfComp126   = spxCloseDa/spxCloseDa[n126]
+perfTicker189 = closeDa/closeDa[n189]
+perfComp189   = spxCloseDa/spxCloseDa[n189]
+perfTicker252 = closeDa/closeDa[n252]
+perfComp252   = spxCloseDa/spxCloseDa[n252]
 // Calculation of relative/comparative performance
 limiteComp = 2 // +/- 100% limitation
 spxThreeMthRS  = ( perfTicker63/perfComp63 )
@@ -382,6 +410,12 @@ if(rsRating1>=80 and rsRating2>=49 and rsRating2<=65 and rsRating3<=45 and rsRat
 isDaily = timeframe.isdaily
 labelText1 = "RS Rating"
 labelText2 = "\n\n"+str.tostring(totalRsRating,"#0")
+// if(seedetail)
+//     if(isDaily)
+//         labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")+" ("+str.tostring(rsRating1,"#0")+" | "+str.tostring(rsRating2,"#0")+" | "+str.tostring(rsRating3,"#0")+")"
+//     else
+//         labelText2 := ""
+// else
 if(isDaily)
     labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")
 else
@@ -409,6 +443,8 @@ label.delete(label2[1])
 // plotshape(hb, title = "High", location= location.top, color=#0066ff , offset=hb, size = size.tiny, show_last=1, style=shape.circle)
 // //plots shape on chart at low - Red Dot
 // plotshape(lb, title = "Low", location= location.bottom, color=#ff0000 , offset=lb, size = size.tiny, show_last=1, style=shape.circle)
+
+
 
 
 
