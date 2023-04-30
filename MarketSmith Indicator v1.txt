@@ -90,10 +90,15 @@ hideRSLine  = input(false, title="Hide RS Line", group="----------RS Rating-----
 hideRSRat   = input(false, title="Hide Rating", group = "----------RS Rating----------", inline="0")
 //seedetail   = input(false, title="Display the 3 results", group = "Parameters", inline="0")
 src         = close
-comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------")
-SpxValue    = input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------")
+comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------", tooltip = "Reference ticker used for calculation of the RS Line and RS Score.")
+SpxValue    = input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price. If you modify the ticker, please report its value in this box.")
+
 colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "----------RS Rating----------")
-//
+plotNewHigh = input(false, title = "Plot RS New Highs", group = "----------RS Rating----------")
+blueDotCol  = input(color.rgb(38, 198, 218,60), title = "Color of Dots", group = "----------RS Rating----------")
+rsNewHigh   = input.string("RS New Highs", title = "Which New High", options=["RS New Highs","RS New Highs Before Price", "Historical RS New Highs", "Historical RS New Highs  Before Price"], group = "----------RS Rating----------")
+iRecentHighLookback = input.int(40, title = "Recent high look-back count", minval = 10, maxval = 200, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Highs.")
+
 
 // If you want to change weight easily you can uncomment these inputs variable and comment the same non-input variable just below
 // SMA method
@@ -142,13 +147,103 @@ n126     = barIndex < 126 ? barIndex : 126
 n189     = barIndex < 189 ? barIndex : 189
 n252     = barIndex < 252 ? barIndex : 252
 
+// New High Code
+// Creating array for New High Detection (John Muchow's code Adapted)
+var float previousRsCurve = 0
+var arrayOfCurves = array.new_float(0)
+var arrayOfCloses = array.new_float(0)
 
 // Comparative Ticker for RS Line
 // Line 15 is declared the input for the comparative ticker
 comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, close)
 // RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
-rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80 
+// rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80 
+rsCurve             = (src/comparativeSymbol)
+rsRatio             = timeframe.isweekly ? SpxValue*50/100:SpxValue*80/100
+rs                  = rsCurve*rsRatio
+previRecentHighLookback = iRecentHighLookback
+iRecentHighLookback := math.min(iRecentHighLookback - 1, bar_index)
 plot(hideRSLine ? na:rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+
+//*************************************************************************************
+// Price and managing new highs
+//*************************************************************************************
+
+// Save for comparison of new high
+array.push(arrayOfCloses, close)
+
+//-----------------------------------------------------------
+// Get the recent close high and its index.
+//-----------------------------------------------------------
+recentCloseHigh = 0.0
+indexOfCloseHigh = 0
+if (barstate.islast)
+    // Loop from latest backwards...
+    for i = bar_index to bar_index - iRecentHighLookback
+        if array.get(arrayOfCloses, i) > recentCloseHigh
+            recentCloseHigh := array.get(arrayOfCloses, i)
+            indexOfCloseHigh := i
+
+//-----------------------------------------------------------
+// Close new high? 
+//-----------------------------------------------------------
+newCloseHigh = false
+if (barstate.islast)
+    if (close == recentCloseHigh)
+        newCloseHigh := true
+
+// if (newCloseHigh)
+//     label.new(x = bar_index, y = close, color = blueDotCol, style = label.style_circle, size = size.tiny)
+
+
+//*************************************************************************************
+// RS Line, plotting and managing new high
+//*************************************************************************************
+
+// Save for comparison of new high
+previousRsCurve := rsCurve
+array.push(arrayOfCurves, rs)
+
+//-----------------------------------------------------------
+// Get the recent high ratio and its index
+//-----------------------------------------------------------
+recentRatioHigh = 0.0
+indexOfRatioHigh = 0
+if (barstate.islast)
+    // Loop from latest backwards...
+    for i = bar_index to bar_index - iRecentHighLookback
+        if array.get(arrayOfCurves, i) > recentRatioHigh
+            recentRatioHigh := array.get(arrayOfCurves, i)
+            indexOfRatioHigh := i
+
+//-----------------------------------------------------------
+// RS Line new high?
+//-----------------------------------------------------------
+newRatioHigh = false
+if (barstate.islast)
+    if ((rs) == recentRatioHigh)
+        newRatioHigh := true
+
+if (rsNewHigh == "RS New Highs" and plotNewHigh and newRatioHigh)
+    label.new(x = bar_index, y = (rs), color = blueDotCol, style = label.style_circle, size = size.tiny)
+
+//-----------------------------------------------------------
+// Is RS Line at new high before price?
+//-----------------------------------------------------------
+if (rsNewHigh == "RS New Highs Before Price" and plotNewHigh and barstate.islast and newRatioHigh and not newCloseHigh)
+    dist = time - time[1]
+    label.new(x = bar_index, y = (rs), color = blueDotCol, style = label.style_circle, size = size.tiny)
+
+// Historical New Highs & New Highs Before Price
+
+histNH = ta.highest(rs  , previRecentHighLookback)
+histCl = ta.highest(high, previRecentHighLookback)
+// Historical RS New High
+if(rsNewHigh == "Historical RS New Highs" and plotNewHigh and rs == histNH)
+    label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = size.tiny)
+// Historical RS New High Before Price
+if(rsNewHigh == "Historical RS New Highs  Before Price" and plotNewHigh and rs == histNH and high < histCl)
+    label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = size.tiny)
 
 
 // New Calculation model -- EXPERIMENTAL
