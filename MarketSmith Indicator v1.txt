@@ -91,8 +91,8 @@ hideRSRat   = input(false, title="Hide Rating", group = "----------RS Rating----
 //seedetail   = input(false, title="Display the 3 results", group = "Parameters", inline="0")
 src         = close
 comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------", tooltip = "Reference ticker used for calculation of the RS Line and RS Score.")
-SpxValue    = input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price. If you modify the ticker, please report its value in this box.")
-
+SpxValue    = 3900//input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price. If you modify the ticker, please report its value in this box.")
+offset      = input.int(80, minval = 0, maxval = 300, title="Offset of the line", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price.")
 colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "----------RS Rating----------")
 plotNewHigh = input(false, title = "Plot RS New Highs", group = "----------RS Rating----------")
 blueDotCol  = input(color.rgb(38, 198, 218,60), title = "Color of Dots", group = "----------RS Rating----------")
@@ -159,7 +159,7 @@ comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, cl
 // RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
 // rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80 
 rsCurve             = (src/comparativeSymbol)
-rsRatio             = timeframe.isweekly ? SpxValue*50/100:SpxValue*80/100
+rsRatio             = timeframe.isweekly ? SpxValue*(offset-10)/100:SpxValue*offset/100  // 70 We - 80 Da
 rs                  = rsCurve*rsRatio
 previRecentHighLookback = iRecentHighLookback
 iRecentHighLookback := math.min(iRecentHighLookback - 1, bar_index)
