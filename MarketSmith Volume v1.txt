@@ -4,9 +4,10 @@
 //@version=5
 indicator("MarketSmith Volumes", format = format.volume)
 prevC   = input(true, title='Color Based On Previous Close',  group="----------VOLUMES----------", inline="x")
-trunc   = input(true, title="Truncate for MarketSmith type display", group = "DISPLAY")
+trunc   = input(false, title="Truncate for MarketSmith type display", group = "DISPLAY")
 labels  = input(true, title="Labels on Volume", group = "DISPLAY")
-len     = input(50, "Length", group = "MA")
+lenDa     = input(50, "Length Daily", group = "MA")
+lenWe     = input(10, "Length Weekly", group = "MA")
 tf      = timeframe.period
 ticker  = syminfo.tickerid
 
@@ -16,7 +17,7 @@ vol     = request.security(s, tf, volume)
 colr = close>open ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
 if(prevC)
     colr := close>close[1] ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
-ma      = ta.sma(vol, len)
+ma      = timeframe.isweekly ? ta.sma(vol, lenWe) : ta.sma(vol, lenDa)
 
 // plot(vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
 // plot(ma, title = "MA", color = color.red)
