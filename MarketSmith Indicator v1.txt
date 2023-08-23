@@ -91,453 +91,264 @@ hideRSRat   = input(false, title="Hide Rating", group = "----------RS Rating----
 //seedetail   = input(false, title="Display the 3 results", group = "Parameters", inline="0")
 src         = close
 comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------", tooltip = "Reference ticker used for calculation of the RS Line and RS Score.")
-SpxValue    = 3900//input(3900, title="Value of Comparative Symbol", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price. If you modify the ticker, please report its value in this box.")
-offset      = input.int(80, minval = 0, maxval = 300, title="Offset of the line", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price.")
+SpxValue    = input(4400, title="Value of Comparative Symbol", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price. If you modify the ticker, please report its value in this box.")
+offset      = input.int(80, minval = 0, maxval = 300, title="Offset (%)", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price.")
 colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "----------RS Rating----------")
 plotNewHigh = input(false, title = "Plot RS New Highs", group = "----------RS Rating----------")
+plotNewLow  = input(false, title = "Plot RS New Lows", group = "----------RS Rating----------")
 blueDotCol  = input(color.rgb(38, 198, 218,60), title = "Color of Dots", group = "----------RS Rating----------")
-rsNewHigh   = input.string("RS New Highs", title = "Which New High", options=["RS New Highs","RS New Highs Before Price", "Historical RS New Highs", "Historical RS New Highs  Before Price"], group = "----------RS Rating----------")
-iRecentHighLookback = input.int(40, title = "Recent high look-back count", minval = 10, maxval = 200, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Highs.")
+redDotCol   = input(color.rgb(255, 82, 82, 60), title = "Color", group = "----------RS Rating----------")
+rsNewHigh   = input.string("Historical RS New Highs", title = "Type", options=["RS New Highs","RS New Highs Before Price", "Historical RS New Highs", "Historical RS New Highs  Before Price"], group = "----------RS Rating----------")
+rsNewLow    = input.string("Historical RS New Lows", title = "Type", options=["RS New Lows","RS New Lows Before Price", "Historical RS New Lows", "Historical RS New Lows  Before Price"], group = "----------RS Rating----------")
+lookback    = input.int(40, title = "Look-back", minval = 1, maxval = 200, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Highs.")
+lookback2   = input.int(40, title = "Look-back", minval = 1, maxval = 200, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Lows.")
+boolMa      = input(false, title = "Display MA", group = "MA on RS Line")
+lenMa       = input(21, title = "Lenght Da", group = "MA on RS Line", inline = "c")
+colMa       = input(color.orange, title = "Color", group = "MA on RS Line", inline = "c")
+typMa       = input.string("EMA", title = "Type Da", options = ["SMA", "EMA"], group = "MA on RS Line", inline = "c")
+lenMaWe     = input(10, title = "Lenght We", group = "MA on RS Line", inline = "c")
+typMaWe     = input.string("SMA", title = "Type We", options = ["SMA", "EMA"], group = "MA on RS Line", inline = "c")
+fillMa      = input(false, title = "Area Color", group = "MA on RS Line")
+posCol      = input(color.rgb(0, 230, 119, 75), title = "Positive Area", group = "MA on RS Line", inline = "d")
+negCol      = input(color.rgb(255, 82, 82, 75),  title = "Negative Area", group = "MA on RS Line", inline = "d")
 
 
-// If you want to change weight easily you can uncomment these inputs variable and comment the same non-input variable just below
-// SMA method
-// W1Ma        = input(40, title = "W1 %SMA", group = "Method 1", inline = "1")
-// W2Ma        = input(20, title = "W2", group = "Method 1", inline = "1")
-// W3Ma        = input(20, title = "W3 %SMA", group = "Method 1", inline = "2")
-// W4Ma        = input(20, title = "W4", group = "Method 1", inline = "2")
-//Classic perf method
-// W1P         = input(40, title = "W1 Perf", group = "Method 2", inline = "3")
-// W2P         = input(20, title = "W2", group = "Method 2", inline = "3")
-// W3P         = input(20, title = "W3 Perf", group = "Method 2", inline = "4")
-// W4P         = input(20, title = "W4", group = "Method 2", inline = "4")
-//Spx
-// spxW1Ma       = input(40, title = "W1 Comparative Perf", group = "Method 3", inline = "5")
-// spxW2Ma       = input(20, title = "W2", group = "Method 3", inline = "5")
-// spxW3Ma       = input(20, title = "W3 Comparative Perf", group = "Method 3", inline = "6")
-// spxW4Ma      = input(20, title = "W4", group = "Method 3", inline = "6")
-// Final
-// w1          = input(2, title = "Weight assigned for Method 1", group = "Final Calculation")
-// w2          = input(1, title = "Weight assigned for Method 2", group = "Final Calculation")
-// w3          = input(1, title = "Weight assigned for Method 3", group = "Final Calculation")
+// Using bar index in case of IPO to avoid NaN results
+// Added max_bars_max = 253 to improve display speed
+n63      = bar_index < 63  ? bar_index:63 
+n126     = bar_index < 126 ? bar_index:126
+n189     = bar_index < 189 ? bar_index:189
+n252     = bar_index < 252 ? bar_index:252
 
-// SMA method
-W1Ma        = 40
-W2Ma        = 20
-W3Ma        = 20
-W4Ma        = 20
-//Classic perf method
-W1P         = 40
-W2P         = 20
-W3P         = 20
-W4P         = 20
-//Spx
-spxW1Ma     = 40
-spxW2Ma     = 20
-spxW3Ma     = 20
-spxW4Ma     = 20
-// Final
-w1          = 2
-w2          = 1
-w3          = 1
-// Using bar index in case of IPO for avoiding NaN results
-barIndex = bar_index
-n63      = barIndex < 63  ? barIndex : 63
-n126     = barIndex < 126 ? barIndex : 126
-n189     = barIndex < 189 ? barIndex : 189
-n252     = barIndex < 252 ? barIndex : 252
-
-// New High Code
-// Creating array for New High Detection (John Muchow's code Adapted)
-var float previousRsCurve = 0
-var arrayOfCurves = array.new_float(0)
-var arrayOfCloses = array.new_float(0)
 
 // Comparative Ticker for RS Line
-// Line 15 is declared the input for the comparative ticker
 comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, close)
 // RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
-// rs                  = timeframe.isweekly ? src/comparativeSymbol * SpxValue*0.50:src/comparativeSymbol * SpxValue*0.80 
 rsCurve             = (src/comparativeSymbol)
-rsRatio             = timeframe.isweekly ? SpxValue*(offset-10)/100:SpxValue*offset/100  // 70 We - 80 Da
+// We use a wider offset for Weekly timeframe for a smoother display
+rsRatio             = timeframe.isweekly ? SpxValue*(offset-10)/100:SpxValue*offset/100
 rs                  = rsCurve*rsRatio
-previRecentHighLookback = iRecentHighLookback
-iRecentHighLookback := math.min(iRecentHighLookback - 1, bar_index)
-plot(hideRSLine ? na:rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+prevlookback  = lookback
+prevlookback2 = lookback2 // For RS New Lows
+lookback := math.min(lookback - 1, bar_index)
+rsPlot = plot(rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
 
-//*************************************************************************************
-// Price and managing new highs
-//*************************************************************************************
+// MA on RS Line
+// SMA and EMA
+rsMA      = ta.sma(rs, lenMa)
+if(typMa == "SMA" and not timeframe.isweekly)
+    rsMA      := ta.sma(rs, lenMa)
+if(typMa == "EMA" and not timeframe.isweekly)  
+    rsMA      := ta.ema(rs, lenMa)
+if(typMaWe == "SMA" and timeframe.isweekly)
+    rsMA      := ta.sma(rs, lenMaWe)
+if(typMaWe == "EMA" and timeframe.isweekly)
+    rsMA      := ta.ema(rs, lenMaWe)
 
-// Save for comparison of new high
-array.push(arrayOfCloses, close)
+maPlot    = plot(boolMa ? rsMA :na,    color = colMa, linewidth = 1)
 
-//-----------------------------------------------------------
-// Get the recent close high and its index.
-//-----------------------------------------------------------
-recentCloseHigh = 0.0
-indexOfCloseHigh = 0
-if (barstate.islast)
-    // Loop from latest backwards...
-    for i = bar_index to bar_index - iRecentHighLookback
-        if array.get(arrayOfCloses, i) > recentCloseHigh
-            recentCloseHigh := array.get(arrayOfCloses, i)
-            indexOfCloseHigh := i
-
-//-----------------------------------------------------------
-// Close new high? 
-//-----------------------------------------------------------
-newCloseHigh = false
-if (barstate.islast)
-    if (close == recentCloseHigh)
-        newCloseHigh := true
-
-// if (newCloseHigh)
-//     label.new(x = bar_index, y = close, color = blueDotCol, style = label.style_circle, size = size.tiny)
+// Color Filling
+// I will use an invisible MA to be able to choose or not the display of the fill
+maPlot2    = plot(boolMa and fillMa ? rsMA:na,    color = color.rgb(0,0,0,100), linewidth = 1)
+// This variable gets the color that will be used for the fill
+fillCol = rs > rsMA ? posCol:negCol
+// Here if a MA is missing, there is no fill
+fill(rsPlot, maPlot2 ,   color=fillCol)
 
 
-//*************************************************************************************
-// RS Line, plotting and managing new high
-//*************************************************************************************
-
-// Save for comparison of new high
-previousRsCurve := rsCurve
-array.push(arrayOfCurves, rs)
-
-//-----------------------------------------------------------
-// Get the recent high ratio and its index
-//-----------------------------------------------------------
-recentRatioHigh = 0.0
-indexOfRatioHigh = 0
-if (barstate.islast)
-    // Loop from latest backwards...
-    for i = bar_index to bar_index - iRecentHighLookback
-        if array.get(arrayOfCurves, i) > recentRatioHigh
-            recentRatioHigh := array.get(arrayOfCurves, i)
-            indexOfRatioHigh := i
-
-//-----------------------------------------------------------
-// RS Line new high?
-//-----------------------------------------------------------
-newRatioHigh = false
-if (barstate.islast)
-    if ((rs) == recentRatioHigh)
-        newRatioHigh := true
-
-if (rsNewHigh == "RS New Highs" and plotNewHigh and newRatioHigh)
-    label.new(x = bar_index, y = (rs), color = blueDotCol, style = label.style_circle, size = size.tiny)
-
-//-----------------------------------------------------------
-// Is RS Line at new high before price?
-//-----------------------------------------------------------
-if (rsNewHigh == "RS New Highs Before Price" and plotNewHigh and barstate.islast and newRatioHigh and not newCloseHigh)
-    dist = time - time[1]
-    label.new(x = bar_index, y = (rs), color = blueDotCol, style = label.style_circle, size = size.tiny)
 
 // Historical New Highs & New Highs Before Price
-
-histNH = ta.highest(rs  , previRecentHighLookback)
-histCl = ta.highest(high, previRecentHighLookback)
+histNH = ta.highest(rs  , prevlookback)
+histCl = ta.highest(high, prevlookback)
 // Historical RS New High
 if(rsNewHigh == "Historical RS New Highs" and plotNewHigh and rs == histNH)
     label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = size.tiny)
 // Historical RS New High Before Price
 if(rsNewHigh == "Historical RS New Highs  Before Price" and plotNewHigh and rs == histNH and high < histCl)
     label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = size.tiny)
+// RS New High
+if(barstate.islast and rsNewHigh == "RS New Highs" and plotNewHigh and rs == histNH)
+    label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = size.tiny)
+// RS New High Before Price
+if(barstate.islast and rsNewHigh == "RS New Highs Before Price" and plotNewHigh and rs == histNH and high < histCl)
+    label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = size.tiny)
 
 
-// New Calculation model -- EXPERIMENTAL
-// I will combine 3 methods
-// The first one will calculate how the stock behave vs SMA thanks to tickers showing % of stock above (200,150,100,50,20)
-// The second method will be an adaptation of the classic way that is provided to calculate RS Rating Perf close vs close 3M back (detail on the formula below)
-// The third will be a measure of how the stock perform against the comparative Symbol
-// For all these 3 techniques I will be using the formula delivered by IBD: RS Score = 40% * P3 + 20% * P6 + 20% * P9 + 20% * P12
-//
-// Finally I will try to calibrate the result for it to be at least relevant. I'm not aiming for 100% accuracy at all.
-// In fact considering the tools we have on tradingview this is not possible to be 100% accurate.
-// Don't hesitate to modify constants or calculation and try to find best results :) If you find a better result than me please contact me!
+// Historical New Lows & New Lows Before Price
+histNL  = ta.lowest(rs , prevlookback2)
+histClL = ta.lowest(low, prevlookback2)
+// Historical RS New Low
+if(rsNewLow == "Historical RS New Lows" and plotNewLow and rs == histNL)
+    label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = size.tiny)
+// Historical RS New Low Before Price
+if(rsNewLow == "Historical RS New Lows  Before Price" and plotNewLow and rs == histNL and low > histClL)
+    label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = size.tiny)
+// RS New Low
+if(barstate.islast and rsNewLow == "RS New Lows" and plotNewLow and rs == histNL)
+    labelNL   = label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = size.tiny)
+// RS New Low Before Price
+if(barstate.islast and rsNewLow == "RS New Lows Before Price" and plotNewLow and rs == histNL and low > histClL)
+    labelNLBP = label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = size.tiny)
 
 
-// 1ST METHOD
-// Tickers I will use
-// MMTH - %Stock > 200 Da SMA
-// MMOF - %Stock > 150 Da SMA
-// MMOH - %Stock > 100 Da SMA
-// MMFI - %Stock > 50 Da SMA
-// MMTW - %Stock > 20 Da SMA
-// MMFD - %Stock > 5 Da SMA (more or less only noise, I won't use the 5 Daily SMA)
 
-//                 |Formula                     | Here I use this code to limite 75% up and 25% down regarding number of stock above SMA X
-limitDown = 25                               // | This limitation will allow me to calculate a theorical max & min to limit the result to 99 & 1
-limitUp   = 75
-perStockAbove200 = request.security("MMTH", 'D', close) > limitUp ? limitUp:request.security("MMTH", 'D', close) < limitDown ? limitDown:request.security("MMTH", 'D', close)
-perStockAbove150 = request.security("MMOF", 'D', close) > limitUp ? limitUp:request.security("MMOF", 'D', close) < limitDown ? limitDown:request.security("MMOF", 'D', close)
-perStockAbove100 = request.security("MMOH", 'D', close) > limitUp ? limitUp:request.security("MMOH", 'D', close) < limitDown ? limitDown:request.security("MMOH", 'D', close)
-perStockAbove50  = request.security("MMFI", 'D', close) > limitUp ? limitUp:request.security("MMFI", 'D', close) < limitDown ? limitDown:request.security("MMFI", 'D', close)
-perStockAbove20  = request.security("MMTW", 'D', close) > limitUp ? limitUp:request.security("MMTW", 'D', close) < limitDown ? limitDown:request.security("MMTW", 'D', close)
-
-// The goal is to gather as much data as possible as we can't compare the score relatively to every other ticker. We do an approximation based on SMA and % of stock above them at X moment.
-closeDa = request.security(syminfo.tickerid, 'D', close)
-// SMA Declaration based on SMA Daily on the ticker we're watching
-sma200_2 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,200))
-sma150 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,150))
-sma100 = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,100))
-sma50_2  = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,50))
-sma20  = request.security(syminfo.tickerid, 'D', ta.sma(closeDa,20))
-// Daily Close SPX500
+// Calculation of the RS Rating
+// Getting ticker and reference ticker daily data
+closeDa    = request.security(syminfo.tickerid,    'D', close)
 spxCloseDa = request.security(comparativeTickerId, 'D', close)
-// We save if we were above dedicated moving averages in a boolean variable
-// Reference point ticker
-bCloseAbove200 = closeDa > sma200_2 ? 1:0
-bCloseAbove150 = closeDa > sma150 ? 1:0
-bCloseAbove100 = closeDa > sma100 ? 1:0
-bCloseAbove50  = closeDa > sma50_2  ? 1:0
-bCloseAbove20  = closeDa > sma20  ? 1:0
-// Refence 63 days back (3 months)
-bClose63Above200 = closeDa[n63] > sma200_2[n63] ? 1:0
-bClose63Above150 = closeDa[n63] > sma150[n63] ? 1:0
-bClose63Above100 = closeDa[n63] > sma100[n63] ? 1:0
-bClose63Above50  = closeDa[n63] > sma50_2[n63]  ? 1:0
-bClose63Above20  = closeDa[n63] > sma20[n63]  ? 1:0
-// Refence 126 days back (6 months)
-bClose126Above200 = closeDa[n126] > sma200_2[n126] ? 1:0
-bClose126Above150 = closeDa[n126] > sma150[n126] ? 1:0
-bClose126Above100 = closeDa[n126] > sma100[n126] ? 1:0
-bClose126Above50  = closeDa[n126] > sma50_2[n126]  ? 1:0
-bClose126Above20  = closeDa[n126] > sma20[n126]  ? 1:0
-// Refence 189 days back (9 months)
-bClose189Above200 = closeDa[n189] > sma200_2[n189] ? 1:0
-bClose189Above150 = closeDa[n189] > sma150[n189] ? 1:0
-bClose189Above100 = closeDa[n189] > sma100[n189] ? 1:0
-bClose189Above50  = closeDa[n189] > sma50_2[n189]  ? 1:0
-bClose189Above20  = closeDa[n189] > sma20[n189]  ? 1:0
-// Refence 252 days back (12 months)
-bClose252Above200 = closeDa[n252] > sma200_2[n252] ? 1:0
-bClose252Above150 = closeDa[n252] > sma150[n252] ? 1:0
-bClose252Above100 = closeDa[n252] > sma100[n252] ? 1:0
-bClose252Above50  = closeDa[n252] > sma50_2[n252]  ? 1:0
-bClose252Above20  = closeDa[n252] > sma20[n252]  ? 1:0
-// Calculation based on the formula: RS Score = 40% * P3 + 20% * P6 + 20% * P9 + 20% * P12
-// I choosed to calculate like this: if we were above this moving average when only 20% of stock were above, we get 1/0.20 = higher score because it is more noticeable.
-// The same when we are below the moving average whereas 80% of stocks are above, we loose the same amont with the formula 1/(1-0.8)
-// 0 MONTHS RS
-zeroMonthsma200_2Weight = bCloseAbove200 ? 100/(perStockAbove200):-100/(100-perStockAbove200)
-zeroMonthSma150Weight = bCloseAbove150 ? 100/(perStockAbove150):-100/(100-perStockAbove150)  // 100-X% because if the same logic applies if we are exceptionnaly weak 100/(100-75) = 4 vs 1.33
-zeroMonthSma100Weight = bCloseAbove100 ? 100/(perStockAbove100):-100/(100-perStockAbove100)
-zeroMonthsma50_2Weight  = bCloseAbove50  ? 100/(perStockAbove50 ):-100/(100-perStockAbove50 )
-zeroMonthSma20Weight  = bCloseAbove20  ? 100/(perStockAbove20 ):-100/(100-perStockAbove20 )
-zeroMonthWeight       = zeroMonthsma200_2Weight + zeroMonthSma150Weight + zeroMonthSma100Weight + zeroMonthsma50_2Weight + zeroMonthSma20Weight
-// 3 MONTHS RS 
-threeMonthsma200_2Weight = bClose63Above200 ? 100/(perStockAbove200[n63]):-100/(100-perStockAbove200[n63])
-threeMonthSma150Weight = bClose63Above150 ? 100/(perStockAbove150[n63]):-100/(100-perStockAbove150[n63])
-threeMonthSma100Weight = bClose63Above100 ? 100/(perStockAbove100[n63]):-100/(100-perStockAbove100[n63])
-threeMonthsma50_2Weight  = bClose63Above50  ? 100/(perStockAbove50[n63] ):-100/(100-perStockAbove50[n63] )
-threeMonthSma20Weight  = bClose63Above20  ? 100/(perStockAbove20[n63] ):-100/(100-perStockAbove20[n63] )
-threeMonthWeight       = threeMonthsma200_2Weight + threeMonthSma150Weight + threeMonthSma100Weight + threeMonthsma50_2Weight + threeMonthSma20Weight
-// 6 MONTHS RS
-sixMonthsma200_2Weight = bClose126Above200 ? 100/(perStockAbove200[n126]):-100/(100-perStockAbove200[n126]) 
-sixMonthSma150Weight = bClose126Above150 ? 100/(perStockAbove150[n126]):-100/(100-perStockAbove150[n126])
-sixMonthSma100Weight = bClose126Above100 ? 100/(perStockAbove100[n126]):-100/(100-perStockAbove100[n126])
-sixMonthsma50_2Weight  = bClose126Above50  ? 100/(perStockAbove50[n126] ):-100/(100-perStockAbove50[n126] )
-sixMonthSma20Weight  = bClose126Above20  ? 100/(perStockAbove20[n126] ):-100/(100-perStockAbove20[n126] )
-sixMonthWeight       = sixMonthsma200_2Weight + sixMonthSma150Weight + sixMonthSma100Weight + sixMonthsma50_2Weight + sixMonthSma20Weight
-// 9 MONTH RS
-nineMonthsma200_2Weight = bClose189Above200 ? 100/(perStockAbove200[n189]):-100/(100-perStockAbove200[n189])   
-nineMonthSma150Weight = bClose189Above150 ? 100/(perStockAbove150[n189]):-100/(100-perStockAbove150[n189])
-nineMonthSma100Weight = bClose189Above100 ? 100/(perStockAbove100[n189]):-100/(100-perStockAbove100[n189])
-nineMonthsma50_2Weight  = bClose189Above50  ? 100/(perStockAbove50[n189] ):-100/(100-perStockAbove50[n189] )
-nineMonthSma20Weight  = bClose189Above20  ? 100/(perStockAbove20[n189] ):-100/(100-perStockAbove20[n189] )
-nineMonthWeight       = nineMonthsma200_2Weight + nineMonthSma150Weight + nineMonthSma100Weight + nineMonthsma50_2Weight + nineMonthSma20Weight
-// 12 MONTH RS
-twelveMonthsma200_2Weight = bClose252Above200 ? 100/(perStockAbove200[n252]):-100/(100-perStockAbove200[n252])
-twelveMonthSma150Weight = bClose252Above150 ? 100/(perStockAbove150[n252]):-100/(100-perStockAbove150[n252])
-twelveMonthSma100Weight = bClose252Above100 ? 100/(perStockAbove100[n252]):-100/(100-perStockAbove100[n252])
-twelveMonthsma50_2Weight  = bClose252Above50  ? 100/(perStockAbove50[n252] ):-100/(100-perStockAbove50[n252] )
-twelveMonthSma20Weight  = bClose252Above20  ? 100/(perStockAbove20[n252] ):-100/(100-perStockAbove20[n252] )
-twelveMonthWeight       = twelveMonthsma200_2Weight + twelveMonthSma150Weight + twelveMonthSma100Weight + twelveMonthsma50_2Weight + twelveMonthSma20Weight
-// IBD's Formula for score without border (used to apply the cross product)
-scoreWithoutBorder        =  W1Ma * (zeroMonthWeight + threeMonthWeight) + W2Ma * sixMonthWeight + W3Ma * nineMonthWeight + W4Ma * twelveMonthWeight
-// Calculation of theorical max and min scores (Truncated because results are very very arround 50-60 otherwise)
-// (The real formula of maxScore should be   maxScore =  W1Ma * (5*2*100/limitDown) + P2ma * (5*3*100/limitDown)  )
-maxScore =  W1Ma * (2*100/limitDown) + W2Ma * (100/limitDown) + W3Ma * (100/limitDown) + W4Ma * (100/limitDown)
-minScore = -(W1Ma * (2*100/(100-limitUp)) + W2Ma * (100/(100-limitUp)) +  W3Ma * (100/(100-limitUp)) + W4Ma * (100/(100-limitUp)) )
-// Formula for score without border adjusted (for the min value to be equals 1)
-adjustedScoreWithoutBorder = scoreWithoutBorder - minScore + 1
-adjustedMaxScore           = maxScore - minScore +1
-adjustedMinScore           = minScore - minScore +1
-// Formula for score with border (cross product) - Result should not be greater than 99 and lower than 1 to this point
-rsRating1 = math.round((adjustedScoreWithoutBorder)*99/(adjustedMaxScore-adjustedMinScore))
-// Rendering the result (results are mainly distributed at the middle so to get a better result I try to get a wider range by adding to good and removing to bad one)
-// Again results are distributed arround 1 to 75 so to get something linear I add to the score proportionally with their distance with 50 (only for better scores)
-if(rsRating1>=50)
-    truncate = (rsRating1-50)/2
-    rsRating1 := math.round(rsRating1 + truncate)
-if(rsRating1>99)
-    rsRating1 := 99
-if(rsRating1<1)
-    rsRating1 := 1
 
-// 2nd METHOD - No modification except limitation to 100% to master the limit and fix it further to 99 and 1 (and also because -100 is the max)
-// Relative strength IBD style -> Initial Calculation against itslef
-limitPerf = 2  // +/- 100% limitation
-ThreeMthRS  = (closeDa/closeDa[n63])
-if(closeDa < closeDa[n63])
-    ThreeMthRS := -(1/ThreeMthRS) // to remove the same score than if this is a positive move
-if(ThreeMthRS > limitPerf)
-    ThreeMthRS := limitPerf
-if(ThreeMthRS < -limitPerf)
-    ThreeMthRS := -limitPerf
-SixMthRS    = (closeDa/closeDa[n126])
-if(closeDa < closeDa[n126])
-    SixMthRS := -(1/SixMthRS)
-if(SixMthRS > limitPerf)
-    SixMthRS := limitPerf
-if(SixMthRS < -limitPerf)
-    SixMthRS := -limitPerf
-NineMthRS   = (closeDa/closeDa[n189])
-if(closeDa < closeDa[n189])
-    NineMthRS := -(1/NineMthRS)
-if(NineMthRS > limitPerf)
-    NineMthRS := limitPerf
-if(NineMthRS < -limitPerf)
-    NineMthRS := -limitPerf
-TwelveMthRS = (closeDa/closeDa[n252])
-if(closeDa < closeDa[n252])
-    TwelveMthRS := -(1/TwelveMthRS)
-if(TwelveMthRS > limitPerf)
-    TwelveMthRS := limitPerf
-if(TwelveMthRS < -limitPerf)
-    TwelveMthRS := -limitPerf
-// Calculation of theorical max and min scores
-maxScore2 = limitPerf*W1P + limitPerf*W2P + limitPerf*W3P + limitPerf*W4P
-minScore2 = -limitPerf*W1P - limitPerf*W2P - limitPerf*W3P - limitPerf*W4P
-// Calulation of Score
-RSraw = W1P * ThreeMthRS + W2P * SixMthRS + W3P * NineMthRS + W4P * TwelveMthRS
-// Adjustment (used to apply the cross product)
-adjustedPerfScoreWithoutBorder = RSraw - minScore2 + 1
-adjustedPerfMaxScore           = maxScore2 - minScore2 + 1
-adjustedPerfMinScore           = minScore2 - minScore2 + 1
-// Formula for score with border (cross product)
-rsRating2 = math.round((adjustedPerfScoreWithoutBorder)*99/(adjustedPerfMaxScore-adjustedPerfMinScore))
-// Rendering the result
-if(rsRating2>=50)
-    truncate = (rsRating2-50)/2
-    rsRating2 := math.round(rsRating2 + truncate)
-if(rsRating2>99)
-    rsRating2 := 99
-if(rsRating2<1)
-    rsRating2 := 1
+// Calculation of the performance from 1 to 4 last quarters
+// Ticker
+perfTicker63   = closeDa/closeDa[n63]
+perfTicker126  = closeDa/closeDa[n126]
+perfTicker189  = closeDa/closeDa[n189]
+perfTicker252  = closeDa/closeDa[n252]
+
+// SP500 of reference ticker
+perfComp63     = spxCloseDa/spxCloseDa[n63]
+perfComp126    = spxCloseDa/spxCloseDa[n126]
+perfComp189    = spxCloseDa/spxCloseDa[n189]
+perfComp252    = spxCloseDa/spxCloseDa[n252]
+
+// Using Formula to calculate a relative score of the ticker and the SP500 with the last quarter weighted double
+float rs_stock = 0.4*perfTicker63 + 0.2*perfTicker126 + 0.2*perfTicker189 + 0.2*perfTicker252
+float rs_ref   = 0.4*perfComp63   + 0.2*perfComp126   + 0.2*perfComp189   + 0.2*perfComp252
+
+// Calculation of the total relative score or rs performance
+float totalRsScore  = (rs_stock) / (rs_ref) * 100
+float totalRsRating = -1
+
+// Here we calculated the relative score of the stock. The goal is now to assign the percentile correctly
+// For this I took the curve given by my fork repo of Skyte on Rs Log and tried to calibrate the better possible
+// the output curve of the relative performance of the 6,6xx stocks.
+// Link: https://github.com/Fred6725/rs-log/blob/main/output/rs_stocks.csv
+// Here is the curve in ASCII Art; on the x-axis, the Rs Rating and on the y-axis, the calculated performance.
+      
+//                      
+//                                                                                        /                               
+//                                                                                        /                               
+//                                                                                        /                               
+//                                                                                        /                               
+//,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,/,,,,,,,,,,,,,,,,,              
+//                                                                                        /                               
+//                                                                                        /                               
+//                                                                                        /                               
+//                                                                                        /                               
+//                                                                                       |                               
+//                                                                                       /                               
+//                                                                                      ‾                                 
+//                                                                                     ‾                                   
+//                                                                                   -‾                                    
+//                                                                           _____, ‾                                     
+//                                         _____----------------‾‾‾‾‾‾‾‾‾‾‾‾‾                                                   
+//                        __ */‾‾‾‾‾‾‾‾‾‾‾‾                                                                                       
+//             __ ,,----‾‾                                                                                                 
+//          _/                                                                                                           
+//        /                                                                                                               
+//       |                                                                                                     
+// ______|________________ _______________________________ _____________________________________            
+//       |0               |20             |40             |60             |80              |100   
+//
+// I decided to cut this curve in 7 different levels that needs to be entered each day.
+// These are relative strength scores corresponding to percentiles 98, 89, 69, 49, 29, 9 and 1.
+// Finally I used the request.seed() function to auto update these levels automatically on a daily basis.
+// Everything is managed in this repo if you're curious:
+// https://github.com/Fred6725/relative-strength/tree/main    (Fork from Skyte)
+// More precisly in rs_ranking.py for extracting what I needed and in workflows/output.yml for the auto update.
+// The update is done in the private fork of the seed tradingview original repo, checked and synchronised automatically
+// I tried to uplad the full 6,6xx list of relative strength score and rs rating but the display speed was too long.
 
 
+// Use the request.seed() function to access the RS Score environment of all the market
+curveRsPerf  = request.seed("seed_fred6725_rs_rating", "RSRATING", close)
 
-// 3RD METHODE
-// I was running the average of both precedent results and... I found it was actually not that bad!
-// But something was missing, a score for relative strenght against the SPX500.
-// Let's do it
-// Here I wanted to compare perf of ticker vs perf of spx500
-// Limited at 100% of original calculation (I use a limit to determine maxscore and minscore and not go above 99 or under 1)
-perfTicker63  = closeDa/closeDa[n63]
-perfComp63    = spxCloseDa/spxCloseDa[n63]
-perfTicker126 = closeDa/closeDa[n126]
-perfComp126   = spxCloseDa/spxCloseDa[n126]
-perfTicker189 = closeDa/closeDa[n189]
-perfComp189   = spxCloseDa/spxCloseDa[n189]
-perfTicker252 = closeDa/closeDa[n252]
-perfComp252   = spxCloseDa/spxCloseDa[n252]
-// Calculation of relative/comparative performance
-limiteComp = 2 // +/- 100% limitation
-spxThreeMthRS  = ( perfTicker63/perfComp63 )
-if(perfTicker63 < perfComp63)
-    spxThreeMthRS := -(1/spxThreeMthRS)
-if(spxThreeMthRS > limiteComp)
-    spxThreeMthRS := limiteComp
-if(spxThreeMthRS < -limiteComp)
-    spxThreeMthRS := -limiteComp
-spxSixMthRS    = ( perfTicker126/perfComp126 )
-if(perfTicker126 < perfComp126)
-    spxSixMthRS := -(1/spxSixMthRS)
-if(spxSixMthRS > limiteComp)
-    spxSixMthRS := limiteComp
-if(spxSixMthRS < -limiteComp)
-    spxSixMthRS := -limiteComp
-spxNineMthRS   = (perfTicker189/perfComp189)
-if(perfTicker189 < perfComp189)
-    spxNineMthRS := -(1/spxNineMthRS)
-if(spxNineMthRS > limiteComp)
-    spxNineMthRS := limiteComp
-if(spxNineMthRS < -limiteComp)
-    spxNineMthRS := -limiteComp
-spxTwelveMthRS = ( perfTicker252/perfComp252 )
-if(perfTicker252 < perfComp252)
-    spxTwelveMthRS := -(1/spxTwelveMthRS)
-if(spxTwelveMthRS > limiteComp)
-    spxTwelveMthRS := limiteComp
-if(spxTwelveMthRS < -limiteComp)
-    spxTwelveMthRS := -limiteComp
-// Calculation of theorical max and min scores
-spxMaxScore2 = limiteComp*spxW1Ma + limiteComp*spxW2Ma + limiteComp*spxW3Ma + limiteComp*spxW4Ma
-spxMinScore2 = -limiteComp*spxW1Ma - limiteComp*spxW2Ma - limiteComp*spxW3Ma - limiteComp*spxW4Ma
-// Calulation of Score
-spxRSraw = spxW1Ma * spxThreeMthRS + spxW2Ma * spxSixMthRS + spxW3Ma * spxNineMthRS + spxW4Ma * spxTwelveMthRS
-// Adjustment (used to apply the cross product)
-spxAdjustedPerfScoreWithoutBorder = spxRSraw - spxMinScore2 + 1
-spxAdjustedPerfMaxScore           = spxMaxScore2 - spxMinScore2 + 1
-spxAdjustedPerfMinScore           = spxMinScore2 - spxMinScore2 + 1
-// Formula for score with border (cross product)
-rsRating3 = math.round((spxAdjustedPerfScoreWithoutBorder)*99/(spxAdjustedPerfMaxScore-spxAdjustedPerfMinScore))
-// Combination of both systems (w1, w2, are weight to give to the 3 methods)
-float totalRsRating = math.round((w1 * rsRating1 + w2 * rsRating2 + w3 * rsRating3) / (w1 + w2 + w3))  // Combining the 3 methods
+// To prevent loosing data because of week-ends and public holidays I decided to send the value 5 times in a row.
+// Which gives 5*7 = 35 bars.
+// Depending of the day we look at the graph we will have a variable amount of bars. 
+// The goal is to get these 7 numbers anyway.
 
-// Score adjustment based on observation among vaste amount of examples against IBD's ranking
-// This is handiwork, if you want to work on improving the code you should remove this part
-if(rsRating3<45 and rsRating3<rsRating1 and rsRating3<rsRating2) // When we have a great historic score, a great performance but a poor relative strenght, most of the time the rating decrease
-    totalRsRating := math.round((w2 * rsRating2 + w3 * rsRating3) / (w2 + w3))
-if(rsRating2>80 and rsRating1<70 and rsRating3>=68)// Many time when the stock is beaten down but have a huge momentum, this rating is down 20-30 points.
-    totalRsRating := rsRating2-1                   // so we modify the score in this case to take into consideration only the RS Score which is usually not that bad alone at this moment
-if(rsRating2>=59 and rsRating1<=30 and rsRating3>=50)// Many time when the stock is beaten down but have a huge/correct momentum, this rating is down 20-30 points.
-    totalRsRating := rsRating2-1                     // And very often the RsRating is the closer to the final result
-if(rsRating1>=80 and rsRating2>=49 and rsRating2<=65 and rsRating3<=45 and rsRating3>=33 and rsRating2-rsRating3>=6) // Sometimes when rsRating 2 & 3 are in between a given range, results seems OK. Exception here
-    totalRsRating := math.round((w1 * rsRating1 + w2 * rsRating2 + w3 * rsRating3) / (w1 + w2 + w3 ))            // due to the first adjustment but still the first enhances and the second two
+// In case the graph is not updated, we count the number of bars since we have the first data.
+// Calculation of the number of bar since we have the first data
+delta  = ta.barssince(na(curveRsPerf)!=true)
+
+// Table to store the different values
+var float[] different_values = array.new_float(7)
+
+// Counter for stored values
+var int counter = 0
+
+// Browse seed's values and store the first 7 different values
+for i = delta to 34+delta
+    close_value = nz(curveRsPerf[i])
+    if not array.includes(different_values, close_value) and counter < 7 and close_value!=0
+        array.set(different_values, counter, close_value)
+        counter := counter + 1
+
+// Assign stored values to variables
+first = array.get(different_values, 0)
+scnd  = array.get(different_values, 1)
+thrd  = array.get(different_values, 2)
+frth  = array.get(different_values, 3)
+ffth  = array.get(different_values, 4)
+sxth  = array.get(different_values, 5)
+svth  = array.get(different_values, 6)
+
+// Now that we've recovered the environment, we can assign a percentile using a simple linear approximation of the curve (+ adjustment).
+if(totalRsScore >= first)
+    totalRsRating := 99
+if(totalRsScore <= svth)
+    totalRsRating := 1
+
+// Function to attribute the percentile with a simple linear approximation
+f_attributePercentile(totalRsScore, tallerPerf, smallerPerf, rangeUp, rangeDn, weight) =>
+    sum = totalRsScore + (totalRsScore-smallerPerf)*weight // weight is used for manual calibration
+    if(sum > tallerPerf - 1)
+        sum := tallerPerf - 1
+    k1 = smallerPerf/rangeDn
+    k2 = (tallerPerf-1)/rangeUp
+    k3 = (k1-k2)/(tallerPerf-1-smallerPerf)
+    RsRating = sum/(k1-k3*(totalRsScore-smallerPerf))
+    if (RsRating > rangeUp)
+        RsRating := rangeUp
+    if (RsRating < rangeDn)
+        RsRating := rangeDn
+    RsRating
+
+// Between 199 & 120 the score where approx 98 to 90.
+if(totalRsScore < first and totalRsScore >= scnd)
+    totalRsRating := f_attributePercentile(totalRsScore, first, scnd, 98, 90, 0.33)
+// Between 119 and 100 we ave scores between 89 and 70.
+if (totalRsScore < scnd and totalRsScore >= thrd)
+    totalRsRating := f_attributePercentile(totalRsScore, scnd, thrd, 89, 70, 2.1)
+// Between 100 and 91 we ave scores between 69 and 50.
+if (totalRsScore < thrd and totalRsScore >= frth)
+    totalRsRating := f_attributePercentile(totalRsScore, thrd, frth, 69, 50, 0)
+// Between 90 and 82 we ave scores between 49 and 30.
+if (totalRsScore < frth and totalRsScore >= ffth)
+    totalRsRating := f_attributePercentile(totalRsScore, frth, ffth, 49, 30, 0)
+// Between 81 and 56 we ave scores between 29 and 10.
+if (totalRsScore < ffth and totalRsScore >= sxth)
+    totalRsRating := f_attributePercentile(totalRsScore, ffth, sxth, 29, 10, 0)
+// Between 55 and 28 we ave scores between 9 and 2.
+if (totalRsScore < sxth and totalRsScore >= svth)
+    totalRsRating := f_attributePercentile(totalRsScore, sxth, svth, 9, 2, 0)
 
 
 // Display the RS Rating
-// Results are only acceptable in Daily TimeFrame
+// The results can only be used in Daily TimeFrame
 isDaily = timeframe.isdaily
 labelText1 = "RS Rating"
-labelText2 = "\n\n"+str.tostring(totalRsRating,"#0")
-// if(seedetail)
-//     if(isDaily)
-//         labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")+" ("+str.tostring(rsRating1,"#0")+" | "+str.tostring(rsRating2,"#0")+" | "+str.tostring(rsRating3,"#0")+")"
-//     else
-//         labelText2 := ""
-// else
+labelText2 = "N/A"
 if(isDaily)
     labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")
-else
+if(not isDaily)
     labelText2 := ""
 label1 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText1 , color = color.rgb(0,0,0,100), size=size.normal, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
 label2 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText2 , color = color.rgb(0,0,0,100), size=size.large, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
 
 // Delete previous Labels (When new candle opens or when replay mode, the labels were piling on)
 label.delete(label1[1])
-label.delete(label2[1]) 
-
-// Not compatible with my modifications for now----------
-
-//For 4 Year high and low on weekly the value is 244, For 52 week the value can be set as 52 and accordingly
-// Barsback  = input(233,title="No of Bars Back")
-// // calcs high x number days back
-// hb = highestbars(rs, Barsback)
-// // calcs low x number days back
-// lb = lowestbars(rs, Barsback)
-
-// // I remove the dot for the moment because when we modify the scale they aren't stick on the rs line
-// //plots shape on chart at high - Green Dot
-// if(hb!=hb[1])
-//     label.new()
-// plotshape(hb, title = "High", location= location.top, color=#0066ff , offset=hb, size = size.tiny, show_last=1, style=shape.circle)
-// //plots shape on chart at low - Red Dot
-// plotshape(lb, title = "Low", location= location.bottom, color=#ff0000 , offset=lb, size = size.tiny, show_last=1, style=shape.circle)
+label.delete(label2[1])
 
 
 
