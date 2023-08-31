@@ -1,13 +1,14 @@
 // This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// © rvtradesetup
+// © Fred6724
 
 //@version=5
 indicator("MarketSmith Volumes", format = format.volume)
-prevC   = input(true, title='Color Based On Previous Close',  group="----------VOLUMES----------", inline="x")
+prevC   = input(true, title='Color Based On Previous Close',  group="VOLUMES")
+peakL   = input(9, "Peak Length", group="VOLUMES")
 trunc   = input(false, title="Truncate for MarketSmith type display", group = "DISPLAY")
 labels  = input(true, title="Labels on Volume", group = "DISPLAY")
-lenDa     = input(50, "Length Daily", group = "MA")
-lenWe     = input(10, "Length Weekly", group = "MA")
+lenDa   = input(50, "Length Daily", group = "MA")
+lenWe   = input(10, "Length Weekly", group = "MA")
 tf      = timeframe.period
 ticker  = syminfo.tickerid
 
@@ -19,9 +20,6 @@ if(prevC)
     colr := close>close[1] ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
 ma      = timeframe.isweekly ? ta.sma(vol, lenWe) : ta.sma(vol, lenDa)
 
-// plot(vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
-// plot(ma, title = "MA", color = color.red)
-
 // Display in the style of MarketSmith
 // // Recalculation of the volume with limitation
 vol2 = vol > 2*ma ? 2*ma:vol
@@ -30,13 +28,9 @@ vol2 = vol > 2*ma ? 2*ma:vol
 plot(trunc ? vol2:vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
 plot(ma, title = "MA", color = color.red)
 
-// Highest Volume
-// highestVolume = ta.highest(vol, 252)
-// condPlotHighest = volume == highestVolume
-// plotchar(condPlotHighest ? volume:na, char ="Ჿ", location=location.top, color=color.rgb(229,121,27,0), size = size.small)
 
 
-//------------------  Markerd Highs and Lows but for Volumes  ---------------------//
+//------------------  Marked Highs and Lows but for Volumes  ---------------------//
 
 // Price Peak/Valley Points
 // Highlights exact price at high or low points over a 19-period interval.
@@ -46,11 +40,10 @@ plot(ma, title = "MA", color = color.red)
 
 // High Price Point
 if(not timeframe.isweekly and labels)
-    pivotHigh      = ta.pivothigh(volume, 9, 9)
+    pivotHigh      = ta.pivothigh(volume, peakL, peakL)
     if (pivotHigh)
-        textvol9 = str.tostring(vol[9]/1000000, '0.0')+'M'
+        textvol9 = str.tostring(vol[peakL]/1000000, '0.0')+'M'
         if(vol >= 1000000000)
-            textvol9 := str.tostring(vol[9]/1000000000, '0.0')+'B'
-        //textvol9  = vol >= 1000000000 ? str.tostring(vol[9]/1000000000, '0.0')+'B': vol >= 1000000 ? str.tostring(vol[9]/1000000, '0.0')+'M':str.tostring(vol[9], '0.0')
-        volestvol = label.new(bar_index-9, trunc ? vol2[9]:vol[9], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textvol9, textcolor=color.rgb(0,0,0,0))
+            textvol9 := str.tostring(vol[peakL]/1000000000, '0.0')+'B'
+        volestvol = label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textvol9, textcolor=color.rgb(0,0,0,0))
     
