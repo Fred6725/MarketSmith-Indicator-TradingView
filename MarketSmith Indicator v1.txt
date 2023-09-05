@@ -7,9 +7,11 @@ indicator("MarketSmith Indicator", overlay=true, max_bars_back = 253)
 //------------------  BARS PART ---------------------//
 // Color of bars
 prevClose   = input(true, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
-colorCandle = close>open ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
+i_posColor = input(color.rgb(0, 0, 255)   , title='Candle Color Positive', group="----------BARS----------", inline = "1")
+i_negColor = input(color.rgb(222,50,174,0), title='Negative', group="----------BARS----------", inline = "1")
+colorCandle = close>=open ? i_posColor:i_negColor
 if(prevClose)
-    colorCandle := close>close[1] ? color.rgb(39,54,233,0):color.rgb(222,50,174,0)
+    colorCandle := close>=close[1] ? i_posColor:i_negColor
 // Full Body (without border without wick)
 plotcandle(low, high, low, high, title='MarketSmith Bars', color = colorCandle, wickcolor = color.rgb(255,255,255,100), bordercolor = color.rgb(255,255,255,100), editable = true)
 // PlotChar - on close
@@ -34,19 +36,15 @@ iExp200   = input(false, title='Exponential',  group="----------SMAs----------",
 iSma10We    = input(true, title='SMA 1',  group="----------SMAs We----------", inline="sma10We")
 iSmaV10We   = input(10, title='Lenght',  group="----------SMAs We----------", inline="sma10We")
 iExp10We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma10We")
-//iSorS10We   = input.string(defval ='SMA', title='MA 1', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="sma10We")
 iEma20We    = input(true, title='EMA 2',  group="----------SMAs We----------", inline="ema20We")
 iSmaV20We   = input(20, title='Lenght',  group="----------SMAs We----------", inline="ema20We")
 iExp20We    = input(true, title='Exponential',  group="----------SMAs We----------", inline="ema20We")
-//iSorS20We   = input.string(defval ='EMA', title='MA 2', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="ema20We")
 iSma30We    = input(true, title='SMA 3',  group="----------SMAs We----------", inline="sma30We")
 iSmaV30We   = input(30, title='Lenght',  group="----------SMAs We----------", inline="sma30We")
 iExp30We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma30We")
-//iSorS30We   = input.string(defval ='SMA', title='MA 3', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="sma30We")
 iSma40We    = input(true, title='SMA 4',  group="----------SMAs We----------", inline="sma40We")
 iSmaV40We   = input(40, title='Lenght',  group="----------SMAs We----------", inline="sma40We")
 iExp40We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma40We")
-//iSorS40We   = input.string(defval ='SMA', title='MA 4', options=['SMA', 'EMA'], group="----------SMAs We----------", inline="sma40We")
 
 
 // SMA calculation Daily & others TF
@@ -131,7 +129,7 @@ rs                  = rsCurve*rsRatio
 prevlookback  = lookback
 prevlookback2 = lookback2 // For RS New Lows
 lookback := math.min(lookback - 1, bar_index)
-rsPlot = plot(rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+rsPlot = plot(hideRSLine ? na:rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
 
 // MA on RS Line
 // SMA and EMA
@@ -363,17 +361,47 @@ label.delete(label2[1])
 // where there has been no higher price the 9 days prior to that date and
 // the 9 days following that date.
 
-// High Price Point
+// Inputs
 i_displayHL = input(true, title="Display H/L Points", group="High/Low Price Points")
 i_colorHL   = input(color.rgb(0,0,0,0), title='Labels Color', group="High/Low Price Points")
-i_pivot     = input(9, title="Length for peak/valey points")
-if(i_displayHL and not timeframe.isweekly)
-    pivotHigh      = ta.pivothigh(high, i_pivot, i_pivot)
-    if (pivotHigh)
-        textHigh9  = str.tostring(high[i_pivot], '0.00')
-        highestHigh = label.new(bar_index-i_pivot, high[i_pivot], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textHigh9, textcolor=i_colorHL)
+i_displayPc = input(false, title="%Change", group='High/Low Price Points')
+i_colorPctP = input(color.rgb(0, 0, 255), title='Positive % Color', group="High/Low Price Points", inline = "z")
+i_colorPctN = input(color.rgb(222,50,174,0), title='Negative %', group="High/Low Price Points", inline = "z")
+i_pivot     = input(9, title="Length for peak/valey points", group="High/Low Price Points")
+
+// Definr arrays to store pivot values
+var pivotHighValues = array.new_float(0)
+var pivotLowValues  = array.new_float(0)
+
+if(i_displayHL and not tfWeekly)
+    // Use the function ta.pivothigh/low()
+    pivotHigh = ta.pivothigh(high, i_pivot, i_pivot)
+    pivotLow  = ta.pivotlow (low,  i_pivot, i_pivot)
+    // High Price Point
+    if(pivotHigh)
+        array.unshift(pivotHighValues, high[i_pivot])
+        textHigh9   = i_displayPc ? str.tostring(high[i_pivot], '0.00')+'\n':str.tostring(high[i_pivot], '0.00')
+        highestHigh = label.new(bar_index-i_pivot, array.get(pivotHighValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=textHigh9, textcolor=i_colorHL)
     // Low Price Point
-    pivotLow       = ta.pivotlow(low, i_pivot, i_pivot)
-    if (pivotLow)
-        textLow9  = str.tostring(low[i_pivot], '0.00')
-        lowestLow  = label.new(bar_index-i_pivot, low[i_pivot], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n" + textLow9, textcolor=i_colorHL, color=color.rgb(0,0,0,100))
+    if(pivotLow)
+        array.unshift(pivotLowValues, low[i_pivot])    //low[i_pivot]
+        textLow9    = "\n" + str.tostring(low[i_pivot], '0.00')
+        lowestLow   = label.new(bar_index-i_pivot, array.get(pivotLowValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text=textLow9, textcolor=i_colorHL, color=color.rgb(0,0,0,100))
+    // Percentage Variation
+    float pHigh = na
+    float pLow  = na
+    if array.size(pivotHighValues) > 0
+        pHigh := array.get(pivotHighValues, 0)
+    if array.size(pivotLowValues) > 0
+        pLow  := array.get(pivotLowValues, 0)
+    prcVarHigh = (pHigh - pLow)/pLow * 100
+    prcVarLow  = (pLow/pHigh - 1) * 100  // Formula to calculate percentage decline
+    prcVarHighText = prcVarHigh>=0 ? '+'+str.tostring(prcVarHigh, '0.0') + '%':str.tostring(prcVarHigh, '0.0') + '%'
+    prcVarLowText  = prcVarLow>=0 ? '+'+str.tostring(prcVarLow , '0.0') + '%':str.tostring(prcVarLow, '0.0') + '%'
+    colorPctUp = prcVarHigh>=0 ? i_colorPctP:i_colorPctN
+    colorPctDn = prcVarLow >=0 ? i_colorPctP:i_colorPctN
+    // High Price Point Percent Variation 
+    if(pivotHigh and i_displayPc)
+        pctPivotHigh = na(prcVarHigh)==true ? na:label.new(bar_index-i_pivot, array.get(pivotHighValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=prcVarHighText, textcolor=colorPctUp)
+    if(pivotLow and i_displayPc)
+        pctPivotLow  = na(prcVarLow)==true ? na:label.new(bar_index-i_pivot, array.get(pivotLowValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n\n\n" + prcVarLowText, textcolor=colorPctDn, color=color.rgb(0,0,0,100))
