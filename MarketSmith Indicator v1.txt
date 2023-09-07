@@ -22,29 +22,37 @@ plotchar(close, char='-', location=location.absolute, size=size.small, color=col
 iSma10    = input(true, title='MA 1',  group="----------SMAs----------", inline="sma10")
 iSmaV10   = input(10, title='Lenght',  group="----------SMAs----------", inline="sma10")
 iExp10    = input(true, title='Exponential',  group="----------SMAs----------", inline="sma10")
+iCol10    = input(color.rgb(68,186,76), title="", group="----------SMAs----------", inline="sma10")
 iSma21    = input(true, title='MA 2',  group="----------SMAs----------", inline="sma21")
 iSmaV21   = input(21, title='Lenght',  group="----------SMAs----------", inline="sma21")
 iExp21    = input(true, title='Exponential',  group="----------SMAs----------", inline="sma21")
+iCol21    = input(color.rgb(240,141,240,0), title="", group="----------SMAs----------", inline="sma21")
 iSma50    = input(true, title='MA 3',  group="----------SMAs----------", inline="sma50")
 iSmaV50   = input(50, title='Lenght',  group="----------SMAs----------", inline="sma50")
 iExp50    = input(false, title='Exponential',  group="----------SMAs----------", inline="sma50")
+iCol50    = input(color.rgb(255,33,33), title="", group="----------SMAs----------", inline="sma50")
 iSma200   = input(true, title='MA 4', group="----------SMAs----------", inline="sma200")
 iSmaV200  = input(200, title='Lenght',  group="----------SMAs----------", inline="sma200")
 iExp200   = input(false, title='Exponential',  group="----------SMAs----------", inline="sma200")
+iCol200    = input(color.rgb(0,0,0,0), title="", group="----------SMAs----------", inline="sma200")
 
 // Input SMA for Weekly TimeFrame
 iSma10We    = input(true, title='SMA 1',  group="----------SMAs We----------", inline="sma10We")
 iSmaV10We   = input(10, title='Lenght',  group="----------SMAs We----------", inline="sma10We")
 iExp10We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma10We")
+iCol10We    = input(color.rgb(255,33,33), title="", group="----------SMAs We----------", inline="sma10We")
 iEma20We    = input(true, title='EMA 2',  group="----------SMAs We----------", inline="ema20We")
 iSmaV20We   = input(20, title='Lenght',  group="----------SMAs We----------", inline="ema20We")
 iExp20We    = input(true, title='Exponential',  group="----------SMAs We----------", inline="ema20We")
+iCol20We    = input(color.rgb(240,141,240,0), title="", group="----------SMAs We----------", inline="ema20We")
 iSma30We    = input(true, title='SMA 3',  group="----------SMAs We----------", inline="sma30We")
 iSmaV30We   = input(30, title='Lenght',  group="----------SMAs We----------", inline="sma30We")
 iExp30We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma30We")
+iCol30We    = input(color.rgb(68,186,76), title="", group="----------SMAs We----------", inline="sma30We")
 iSma40We    = input(true, title='SMA 4',  group="----------SMAs We----------", inline="sma40We")
 iSmaV40We   = input(40, title='Lenght',  group="----------SMAs We----------", inline="sma40We")
 iExp40We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma40We")
+iCol40We    = input(color.rgb(0,0,0,0), title="", group="----------SMAs We----------", inline="sma40We")
 
 
 // SMA calculation Daily & others TF
@@ -61,16 +69,16 @@ sma40We  = iExp40We ? ta.ema(close,iSmaV40We):ta.sma(close,iSmaV40We)
 
 // Ploting SMA/EMA Daily and other TF
 tfWeekly = timeframe.isweekly
-psma10  = plot(iSma10 and not tfWeekly ?  sma10:na,  linewidth=1, color=color.rgb(68,186,76))
-pema21  = plot(iSma21 and not tfWeekly ?  sma21:na,  linewidth=1, color=color.rgb(236,180,245,0))
-psma50  = plot(iSma50 and not tfWeekly ?  sma50:na,  linewidth=1, color=color.red)
-psma200 = plot(iSma200 and not tfWeekly ? sma200:na, linewidth=1, color=color.rgb(0,0,0,0))
+psma10  = plot(iSma10 and not tfWeekly ?  sma10:na,  linewidth=1, color=iCol10)
+pema21  = plot(iSma21 and not tfWeekly ?  sma21:na,  linewidth=1, color=iCol21)
+psma50  = plot(iSma50 and not tfWeekly ?  sma50:na,  linewidth=1, color=iCol50)
+psma200 = plot(iSma200 and not tfWeekly ? sma200:na, linewidth=1, color=iCol200)
 
 // Ploting SMA/EMA We
-psma10We =  plot(iSma10We and tfWeekly  ? sma10We:na, linewidth=1, color=color.red)
-pema20We =  plot(iEma20We and tfWeekly  ? ema20We:na, linewidth=1, color=color.rgb(240,141,240,0))
-psma30We =  plot(iSma30We and tfWeekly  ? sma30We:na, linewidth=1, color=color.rgb(102,144,78,0))
-psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=color.rgb(0,0,0,0))
+psma10We =  plot(iSma10We and tfWeekly  ? sma10We:na, linewidth=1, color=iCol10We)
+pema20We =  plot(iEma20We and tfWeekly  ? ema20We:na, linewidth=1, color=iCol20We)
+psma30We =  plot(iSma30We and tfWeekly  ? sma30We:na, linewidth=1, color=iCol30We)
+psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=iCol40We)
 
 //------------------  RS Line Part  ---------------------// and // SP500 -> 0S&P5 //
 
@@ -349,7 +357,55 @@ label.delete(label1[1])
 label.delete(label2[1])
 
 
+// Weekly Tight Closes Detector
+//input
+WtClose          = input(false, title='Weekly Tight Closes Detector', group="TIGHT CLOSES DETECTOR")
+colorTightCloses = input(color.aqua, title='Color of Tight Closes Boxes', group="TIGHT CLOSES DETECTOR")
+// Calculation
+if(tfWeekly)
+    // Open
+    WkO2   = open[2]
+    //Closes
+    WkC    = close
+    WkC1   = close[1]
+    WkC2   = close[2]
+    // Highs
+    WkH    = high
+    WkH1   = high[1]
+    WkH2   = high[2]
+    // Lows
+    WkL    = low
+    WkL1   = low[1]
+    WkL2   = low[2]
+    // WEMA
+    Wema10 = ta.ema(close,10)
+    Wema20 = ta.ema(close,20)
+    // ATR Weekly (Used to have an auto-adaptive tight closes detector. Formula = Averages High-Low of the 14 previous bars. (Volatility measurement)
+    atr    = ta.atr(14)
+    // Conditions (I like to have 3 tiny candle with tight closes so I add High and Low cond as well)
+    condTightClose = WkC < WkC1+(WkC1*atr/(close*2)) and WkC > WkC1-(WkC1*atr/(close*2)) and WkC1 < WkC2+(WkC2*atr/(close*2)) and WkC1 > WkC2-(WkC2*atr/(close*2)) and WkC < WkC2+(WkC2*atr/(close*2)) and WkC > WkC2-(WkC2*atr/(close*2))
+    condTightHigh = WkH < WkH1+(WkH1*atr/(close*2)) and WkH > WkH1-(WkH1*atr/(close*2)) and WkH1 < WkH2+(WkH2*atr/(close*2)) and WkH1 > WkH2-(WkH2*atr/(close*2))
+    condTightLow = WkL < WkL1+(WkL1*atr/(close*2)) and WkL > WkL1-(WkL1*atr/(close*2)) and WkL1 < WkL2+(WkL2*atr/(close*2)) and WkL1 > WkL2-(WkL2*atr/(close*2))
+    //condNotLowerLows  = WkL2 > WkL1 and WkL1 > WkL
+    // I would like the script not to show me 3 tight candles when the first candle of the three is nearly full and big
+    // For that I wrote that the total size of the weekly wick of the candle must be 2 times bigger than the body
+    // But I noticed somtimes very small candle with little or no wick are still valide so added an exception ! (Yes it is far-fetched)
+    condFirstCandle = false
+    // For positive bars
+    if(WkC2 >= WkO2)
+        condFirstCandle := WkH2 - WkC2 + WkO2 - WkL2 > 2*(WkC2 - WkO2) or (WkH2-WkL2<WkH1-WkL1)
+    // For negative bars
+    if(WkC2 < WkO2)
+        condFirstCandle := WkH2 - WkO2 + WkC2 - WkL2 > 2*(WkO2 - WkC2) or (WkH2-WkL2<WkH1-WkL1)
+    // All condition together
+    condTot3WTight = condTightClose and (condTightHigh or condTightLow) and condFirstCandle //and not condNotLowerLows
 
+
+    //Plot Boxes Arround Weekly Tight Closes
+    highestW = ta.highest(WkH,3)
+    lowestW  = ta.lowest (WkL,3)
+    if(condTot3WTight and WtClose)
+        box.new(bar_index[2], highestW, bar_index, lowestW, border_color = color.new(colorTightCloses,20), border_width = 1, border_style=line.style_dotted, bgcolor = color.new(colorTightCloses,85))
 
 
 
