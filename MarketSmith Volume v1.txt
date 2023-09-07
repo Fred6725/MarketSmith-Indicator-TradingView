@@ -2,27 +2,29 @@
 // © Fred6724
 
 //@version=5
-indicator("MarketSmith Volumes", format = format.volume, max_labels_count = 500)
+indicator('MarketSmith Volumes', format = format.volume, max_labels_count = 500)
 
 // Inputs
-colUp   = input(color.rgb(39,54,233,0), title="Up Volume Color", group = "VOLUMES")
-colDn   = input(color.rgb(222,50,174,0), title="Up Volume Color", group = "VOLUMES")
-prevC   = input(true, title='Color Based On Previous Close',  group="VOLUMES")
-trunc   = input(false, title="Truncate for MarketSmith type display", group = "DISPLAY")
-labels  = input(true, title="Labels on Volume", group = "LABELS")
-percChg = input(true, title='%Chg on Labels',  group="LABELS", inline='1')
-colChg  = input(color.rgb(39,54,233,0), title="| Color", group = "LABELS", inline='1')
-labelC  = input(color.rgb(0,0,0,0), title="Text Label Color", group = "LABELS")
-labelS  = input.string('Normal', 'Text Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "LABELS")
-peakL   = input(9, "Peak Length", group="LABELS")
-lenDa   = input(50, "Length Daily", group = "MA")
-lenWe   = input(10, "Length Weekly", group = "MA")
-colMa   = input(color.red, title="MA Color", group = "MA")
-showLab = input(true, title="Label on Last Volume Bar", group = "CURRENT BAR LABEL")
-labCol  = input(color.rgb(59,60,66,0), title = "Label Color", group = "CURRENT BAR LABEL")
-volCol  = input(color.white, title = "Volume Color", group = "CURRENT BAR LABEL")
-posCol  = input(color.lime, title="Positive Buzz Color", group = "CURRENT BAR LABEL")
-negCol  = input(color.red, title="Negative Buzz Color", group = "CURRENT BAR LABEL")
+colUp   = input(color.rgb(39,54,233,0), title='Up Volume Color', group = 'VOLUMES')
+colDn   = input(color.rgb(222,50,174,0), title='Down Volume Color', group = 'VOLUMES')
+prevC   = input(true, title='Color Based On Previous Close',  group='VOLUMES')
+trunc   = input(false, title='Truncate for MarketSmith type display', group = 'DISPLAY')
+labels  = input(true, title='Labels on Volume', group = 'LABELS', inline='1')
+labelC  = input(color.rgb(0,0,0,0), title='Color', group = 'LABELS', inline='1')
+colChg  = input(color.rgb(39,54,233,0), title='', group = 'LABELS', inline='1')
+percChg = input(true, title='%Change on Labels',  group='LABELS')
+labelS  = input.string('Normal', 'Text Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'LABELS')
+peakL   = input(9, 'Peak Length', group='LABELS')
+lenDa   = input(50, 'Length Daily', group = 'MA')
+lenWe   = input(10, 'Length Weekly', group = 'MA')
+colMa   = input(color.red, title='MA Color', group = 'MA')
+showLab = input(true, title='Label on Last Volume Bar', group = 'CURRENT BAR LABEL')
+sizeLab = input.string('Normal', 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'CURRENT BAR LABEL')
+curDol  = input(false, title='Average $ Volume', group = 'CURRENT BAR LABEL')
+labCol  = input(color.rgb(59,60,66,0), title = 'Label Color', group = 'CURRENT BAR LABEL')
+volCol  = input(color.white, title = 'Volume Color', group = 'CURRENT BAR LABEL')
+posCol  = input(color.lime, title='Positive Buzz Color', group = 'CURRENT BAR LABEL')
+negCol  = input(color.red, title='Negative Buzz Color', group = 'CURRENT BAR LABEL')
 
 tf      = timeframe.period
 ticker  = syminfo.tickerid
@@ -34,21 +36,27 @@ sLabel = switch labelS
     'Small'   => size.small
     'Large'   => size.large
 
+sLabel2 = switch sizeLab
+    'Normal'  => size.normal
+    'Tiny'    => size.tiny
+    'Small'   => size.small
+    'Large'   => size.large
+
 // Volume and MA calculation
-s       = ticker == "NSE:NIFTY" ? "NSE:NIFTY1!" : ticker == "NSE:BANKNIFTY" ? "NSE:BANKNIFTY1!" : ticker == "NSE:CNXFINANCE" ? "NSE:FINNIFTY1!" : ticker
+s       = ticker
 vol     = request.security(s, tf, volume)
 // Color of Volumes
-colr = close>open ? colUp:colDn
+colr = close>=open ? colUp:colDn
 if(prevC)
-    colr := close>close[1] ? colUp:colDn
-ma      = timeframe.isweekly ? ta.sma(vol, lenWe) : ta.sma(vol, lenDa)
+    colr := close>=close[1] ? colUp:colDn
+ma = timeframe.isweekly ? ta.sma(vol, lenWe) : ta.sma(vol, lenDa)
 
 // Display in the style of MarketSmith
 // Recalculation of the volume with limitation
 vol2 = vol > 2*ma ? 2*ma:vol
 // Display
-plot(trunc ? vol2:vol, title = "Volume" , color = colr, style = plot.style_histogram, linewidth = 3)
-plot(ma, title = "MA", color = colMa)
+plot(trunc ? vol2:vol, title = 'Volume' , color = colr, style = plot.style_histogram, linewidth = 3)
+plot(ma, title = 'MA', color = colMa)
 
 // Formatting Volume
 uV = ''
@@ -62,6 +70,19 @@ if(volFormat >= 1000000 and volFormat < 1000000000)
 if(volFormat >= 1000000000)
     volFormat := math.round(volFormat/1000000000, 2)
     uV       := 'B'
+
+// Average $ Volume
+advDol = math.round(close*ma, 0)
+uVDoll = ''
+if(advDol >= 1000 and advDol < 1000000)
+    advDol := math.round(advDol/1000, 0)
+    uVDoll := 'K'
+if(advDol >= 1000000 and advDol < 1000000000)
+    advDol := math.round(advDol/1000000, 0)
+    uVDoll := 'M'
+if(advDol >= 1000000000)
+    advDol := math.round(advDol/1000000000, 0)
+    uVDoll := 'B'
 
 // Labels: Marked Highs Volume Bars Peak     &     %Variation Labels
 // For Good Beat after the Peak Volume Bars Period
@@ -78,12 +99,12 @@ if(labels)
         pivotHigh2 = ta.pivothigh(volume, peakL, i)
         varPercent2 = 100*(vol[i]/ma[i])-100
         if(barstate.islast and pivotHigh2 and varPercent2>25)
-            textvol9  = "N/A"
-            textvol9U = "N/A"
+            textvol9  = 'N/A'
+            textvol9U = 'N/A'
             if(percChg)
                 textvol9  := str.tostring(volFormat[i], '0.0')+uV[i]+'\n'
                 textvol9U := '+'+str.tostring(varPercent2, '0')+'%'
-            if(varPercent2 >= 0 and not percChg)
+            if(not percChg)
                 textvol9  := str.tostring(volFormat[i], '0.0')+uV[i]
                 textvol9U := na
             // Delete Previous Labels to avoid superposition
@@ -96,8 +117,8 @@ if(labels)
             volestvol2U := label.new(bar_index-i, trunc ? vol2[i]:vol[i], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text=textvol9U, textcolor=colChg)
     // For Label After the Peak Period
     if (pivotHigh and varPercent>25)
-        string textvol9  = "N/A"
-        string textvol9U = "N/A"
+        string textvol9  = 'N/A'
+        string textvol9U = 'N/A'
         if(percChg)
             textvol9 := str.tostring(volFormat[peakL], '0.0')+uV[peakL]+'\n'
             textvol9U := '+'+str.tostring(varPercent, '0')+'%'
@@ -113,17 +134,28 @@ if(labels)
         volestvol  := label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size= sLabel, text=textvol9,  textcolor=labelC)
         volestvolU := label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size= sLabel, text=textvol9U, textcolor=colChg)
 
-// Dynamique Label instead of a table
-txtVol = str.tostring(volFormat)+uV+"                "
 
+
+// Dynamique Label instead of a table
 //Formatting Percentage Variation
 volBuzz = 100*(vol/ma)-100
 txtCol  = volBuzz >= 0 ? posCol:negCol
-txtVar  = volBuzz >= 0 ? "               +"+str.tostring(math.round(volBuzz))+'%':"                "+str.tostring(math.round(volBuzz))+'%'
+
+// Text on labels
+txtVol    = str.tostring(volFormat)+uV+'\n'
+txtDolVol = 'N/A'
+txtVar    = volBuzz >= 0 ? '\n+'+str.tostring(math.round(volBuzz))+'%':'\n'+str.tostring(math.round(volBuzz))+'%'
+
+if (curDol)
+    txtVol    := str.tostring(volFormat)+uV+'\n\n'
+    txtDolVol := '\n$'+str.tostring(advDol)+uVDoll+'\n'
+    txtVar    := volBuzz >= 0 ? '\n\n+'+str.tostring(math.round(volBuzz))+'%':'\n\n'+str.tostring(math.round(volBuzz))+'%'
 
 // Label Display
 if barstate.islast and showLab
-    currentVol = label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtVol, color = labCol, textcolor=volCol)
-    currentBuz = label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtVar, color = color.rgb(59,60,66,100), textcolor=txtCol)
+    currentVol       = label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtVol,    textalign = text.align_left, size=sLabel2, color = labCol, textcolor=volCol)
+    currentDollarVol = curDol ? label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtDolVol, textalign = text.align_left, size=sLabel2, color = color.rgb(0, 0, 0, 100), textcolor=volCol):na
+    currentBuz       = label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtVar,    textalign = text.align_left, size=sLabel2, color = color.rgb(0, 0, 0, 100), textcolor=txtCol)
     label.delete(currentVol[1])
+    label.delete(currentDollarVol[1])
     label.delete(currentBuz[1])
