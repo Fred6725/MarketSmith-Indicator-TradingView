@@ -461,3 +461,195 @@ if(i_displayHL and not tfWeekly)
         pctPivotHigh = na(prcVarHigh)==true ? na:label.new(bar_index-i_pivot, array.get(pivotHighValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=prcVarHighText, textcolor=colorPctUp)
     if(pivotLow and i_displayPc)
         pctPivotLow  = na(prcVarLow)==true ? na:label.new(bar_index-i_pivot, array.get(pivotLowValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n\n\n" + prcVarLowText, textcolor=colorPctDn, color=color.rgb(0,0,0,100))
+
+
+
+
+//------------------  Chart Pattern Recognition  ---------------------//
+
+
+// INPUTS
+i_displayPattern         = input(true, title='Display Pattern'                , group='Chart Pattern Recognition')
+i_displayBoxes           = input(true, title='Display Trade Boxes'            , group='Chart Pattern Recognition')
+i_displayHistoricalBoxes = input(true, title='Display Historical Trade Boxes' , group='Chart Pattern Recognition')
+
+// ARRAYS
+// Define arrays to store pivot values
+var pivotHighValuesC = array.new_float(0)
+// var pivotLowValuesC  = array.new_float(0)
+int baseBeginingX   = 0
+var baseBeginingY   = array.new_float(0)
+var lowOfBase       = array.new_float(0)
+
+// PIVOTS HIGH/LOW
+// Use the function ta.pivothigh/low() and store values in arrays
+pivotHigh = ta.pivothigh(high, i_pivot, i_pivot)
+pivotLow  = ta.pivotlow (low,  i_pivot, i_pivot)
+if (pivotHigh)
+    array.unshift(pivotHighValuesC, high[i_pivot])
+// if (pivotLow)
+//     array.unshift(pivotLowValuesC, low[i_pivot])
+
+
+// NEW SYSTEM
+// Detection of a Pivot High for the detection of the base
+boolHighbase   = false
+boolHigherPiv  = false
+highestOfBase  = ta.highest(high, 25 )
+highestOfHist  = ta.highest(high, 50 )
+lowestBaseLow  = ta.lowest (low , 25 )
+lowestPointLeg = ta.lowest (low , 103)
+var flatBaseCond   = false
+isFlatBase         = false
+
+
+// CONDITIONS FOR BASE DETECTION
+if(array.size(pivotHighValuesC) > 2)
+    // In case the base is made of multiple Pivots High without Pivot Low
+    boolHighbase  := high[25]==array.get(pivotHighValuesC, 0) or  high[25]==array.get(pivotHighValuesC, 1) or high[25]==array.get(pivotHighValuesC, 2)
+    boolHigherPiv := high[25]>=highestOfHist
+    // Minimal Leg Up Calculation
+    legUp     = lowestPointLeg * (15+100)/100
+    legUpCond = high[25] >= legUp
+    // Maximal Base Depth
+    firstBaseDepth = high[25] * (100-35)/100 <= lowestBaseLow
+    // No candle is above high[25]
+    noCandleAbove = highestOfBase <= high[25]
+    // Every Conditions with spikes for detection
+    flatBaseCond := boolHighbase and boolHigherPiv and legUpCond and firstBaseDepth and noCandleAbove
+
+// TEST (SUPPR)
+// Minimal Leg Up Calculation
+legUp     = lowestPointLeg * (15+100)/100
+legUpCond = high[25] >= legUp
+// Maximal Base Depth
+firstBaseDepth = high[25] * (100-35)/100 <= lowestBaseLow
+// No candle is above high[25]
+noCandleAbove = highestOfBase <= high[25]
+// Every Conditions with spikes for detection
+flatBaseCond := boolHighbase and boolHigherPiv and legUpCond and firstBaseDepth and noCandleAbove
+
+
+// If Base Detected we store key points
+if (flatBaseCond and not isFlatBase[1])
+    array.unshift(baseBeginingY, high[25])
+    baseBeginingX := bar_index[25]
+    array.unshift(lowOfBase    , lowestBaseLow)
+
+// Bool for Actual base that stay at 1 while the base is still valid
+if (flatBaseCond or isFlatBase[1])
+    isFlatBase := true
+
+
+// Candle Base Counter
+var float baseCount    = na
+// When a base is detected, reset the bar count
+if (flatBaseCond and not isFlatBase[1])
+    baseCount := bar_index-baseBeginingX
+// Increment the bar count if we are in a base
+if (isFlatBase)
+    baseCount := baseCount + 1
+
+// Check if the base is still valid
+float pivotBase  = 0
+float bottomBase = 0
+if (array.size(baseBeginingY)>0 and array.size(lowOfBase)>0)
+    pivotBase  := array.get(baseBeginingY, 0)
+    bottomBase := array.get(lowOfBase    , 0)
+condBaseDepthExceeded = (pivotBase*(100-35)/100 >= lowestBaseLow)
+if (isFlatBase)
+    if (high>pivotBase)
+        isFlatBase := false
+    if (low<bottomBase and not condBaseDepthExceeded)
+        array.unshift(lowOfBase, low)
+    if (condBaseDepthExceeded)
+        isFlatBase := false
+
+
+// Maintenance
+// plot(isFlatBase ? 45:30, color=color.lime)
+// plot(baseCount, color=color.red)
+// plot(flatBaseCond ? 65:50, color=color.purple)
+// Detail of Detection Spike
+// plot(legUpCond ? 9:6, color=color.red)
+// plot(firstBaseDepth ? 9:6, color=color.blue)
+// plot(noCandleAbove ? 9:6, color=color.purple)
+
+
+// Variable pour stocker si une base est en cours
+currentIsBase = false
+baseOver      = true
+if (flatBaseCond or currentIsBase[1] and not baseOver[1])
+    currentIsBase := true
+
+// Boolean for Box Gestion
+isBox   = false
+boxOver = true
+if(isBox[1] and not boxOver[1])
+    isBox := true
+
+
+// Graphical Objects Declaration
+// Horizontal Lines
+var line highLine = na
+var line lowLine  = na
+
+// Box for Entry/Take Profit/ SL
+var box entryBox = na
+var box slBox    = na
+var box tpBox    = na
+
+
+// DRAWING ON CHART IF DETECTION
+if (flatBaseCond and not isFlatBase[1] and i_displayPattern)
+    highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
+    lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase    , 0), x2=bar_index, y2=array.get(lowOfBase   , 0),  width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
+    select = i_displayHistoricalBoxes ? false:boxOver
+    // Optional Trade Boxes
+    if(select)
+        box.delete(entryBox)
+        box.delete(slBox)
+        box.delete(tpBox)
+        isBox   := false
+        boxOver := true
+
+
+// Check Top Break
+if (high>line.get_y1(highLine) and isFlatBase[1])
+    isFlatBase := false
+    if(i_displayBoxes)
+        topBase   = array.get(baseBeginingY, 0)
+        entryBox := box.new(bar_index[1], topBase*(1+0.05), bar_index, topBase         , border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(0,0,255,90))
+        slBox    := box.new(bar_index[1], topBase*(1-0.05), bar_index, topBase*(1-0.08), border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(255, 0, 0, 90))
+        tpBox    := box.new(bar_index[1], topBase*(1+0.20), bar_index, topBase*(1+0.25), border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(66, 226, 18, 90))
+        isBox    := true
+        boxOver  := false
+
+// Check Bottom Break
+// Adjust Bottom Base
+if (low < line.get_y1(lowLine) and isFlatBase)
+    prevX1 = line.get_x1(lowLine)
+    line.delete(lowLine)
+    lowLine := line.new(x1=prevX1, y1=low, x2=bar_index, y2=low, width=2, style=line.style_solid, color=color.rgb(146,193,131,0))
+// Check Max Depth and Max Length
+if (low < line.get_y1(highLine) * (100-35)/100 or baseCount>75 and isFlatBase)
+    line.delete(highLine)
+    line.delete(lowLine)
+    isFlatBase    := false
+
+// While the base is still valid, we extend lines
+if (high<=line.get_y1(highLine) and low>=line.get_y1(lowLine ) and isFlatBase)
+    line.set_x2(highLine, bar_index)
+    line.set_x2(lowLine,  bar_index)
+    currentIsBase := true
+    baseOver      := false
+
+
+// BOX GESTION
+// Extend Boxes while the trade runs
+if (high<=line.get_y1(highLine)*(1+0.25) and low>=line.get_y1(highLine)*(1-0.08) and isBox) 
+    box.set_right(entryBox, bar_index)
+    box.set_right(slBox   , bar_index)
+    box.set_right(tpBox   , bar_index)
+    isBox   := true
+    boxOver := false
