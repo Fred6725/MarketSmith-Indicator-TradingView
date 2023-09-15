@@ -2,9 +2,9 @@
 // 
 
 //@version=5
-indicator("MarketSmith Indicator", overlay=true, max_bars_back = 253, max_lines_count = 100)
+indicator("MarketSmith Indicator", overlay=true, max_bars_back = 253, max_lines_count = 150, max_labels_count = 300, max_boxes_count = 120)
 
-//------------------  BARS PART ---------------------//
+//------------------  BARS ---------------------//
 // Color of bars
 prevClose   = input(true, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
 i_posColor = input(color.rgb(0, 0, 255)   , title='Candle Color Positive', group="----------BARS----------", inline = "1")
@@ -17,7 +17,7 @@ plotcandle(low, high, low, high, title='MarketSmith Bars', color = colorCandle, 
 // PlotChar - on close
 plotchar(close, char='-', location=location.absolute, size=size.small, color=colorCandle, editable = true)
 
-//------------------  SMA's PART ---------------------//
+//------------------  SMA's ---------------------//
 // Input SMA for Daily TF and others
 iSma10    = input(true, title='MA 1',  group="----------SMAs----------", inline="sma10")
 iSmaV10   = input(10, title='Lenght',  group="----------SMAs----------", inline="sma10")
@@ -80,7 +80,7 @@ pema20We =  plot(iEma20We and tfWeekly  ? ema20We:na, linewidth=1, color=iCol20W
 psma30We =  plot(iSma30We and tfWeekly  ? sma30We:na, linewidth=1, color=iCol30We)
 psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=iCol40We)
 
-//------------------  RS Line Part  ---------------------// and // SP500 -> 0S&P5 //
+//------------------  RS Rating  ---------------------// and // SP500 -> 0S&P5 //
 
 //Relative Price Strength (RS) Rating or Relative Strenght.
 //This is a measure of a stock's price performance over the last
@@ -103,13 +103,13 @@ colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", g
 plotNewHigh = input(false, title = "Plot RS New Highs", group = "----------RS Rating----------")
 rsNewHigh   = input.string("Historical RS New Highs", title = "Type", options=["RS New Highs","RS New Highs Before Price", "Historical RS New Highs", "Historical RS New Highs  Before Price"], group = "----------RS Rating----------")
 blueDotCol  = input(color.rgb(121, 213, 242,62), title = "Color of Dots", group = "----------RS Rating----------")
-lookback    = input.int(252, title = "Look-back", minval = 1, maxval = 252, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Highs.")
-sizeLabHigh = input.string('Normal', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "----------RS Rating----------")
+lookback    = input.int(250, title = "Look-back", minval = 1, maxval = 252, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Highs.")
+sizeLabHigh = input.string('Tiny', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "----------RS Rating----------")
 plotNewLow  = input(false, title = "Plot RS New Lows", group = "----------RS Rating----------")
 rsNewLow    = input.string("Historical RS New Lows", title = "Type", options=["RS New Lows","RS New Lows Before Price", "Historical RS New Lows", "Historical RS New Lows  Before Price"], group = "----------RS Rating----------")
 redDotCol   = input(color.rgb(255, 82, 82, 62), title = "Color", group = "----------RS Rating----------")
-lookback2   = input.int(252, title = "Look-back", minval = 1, maxval = 252, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Lows.")
-sizeLabLow  = input.string('Normal', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "----------RS Rating----------")
+lookback2   = input.int(250, title = "Look-back", minval = 1, maxval = 252, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Lows.")
+sizeLabLow  = input.string('Tiny', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "----------RS Rating----------")
 boolMa      = input(false, title = "Display MA", group = "MA on RS Line")
 lenMa       = input(21, title = "Lenght Da", group = "MA on RS Line", inline = "c")
 colMa       = input(color.orange, title = "Color", group = "MA on RS Line", inline = "c")
@@ -121,10 +121,10 @@ posCol      = input(color.rgb(0, 230, 119, 75), title = "Positive Area", group =
 negCol      = input(color.rgb(255, 82, 82, 75),  title = "Negative Area", group = "MA on RS Line", inline = "d")
 
 // Blue Dot
-// If Blue Dot is ste to 252 Da, than we want it to be set on 52 We on the Weekly TimeFrame
-if (lookback  == 252 and timeframe.isweekly)
+// If Blue Dot is ste to 250 Da, than we want it to be set on 52 We on the Weekly TimeFrame
+if (lookback  == 250 and timeframe.isweekly)
     lookback  := 52
-if (lookback2 == 252 and timeframe.isweekly)
+if (lookback2 == 250 and timeframe.isweekly)
     lookback2 := 52
 
 // Switch Label Size
@@ -501,21 +501,25 @@ i_displayBoxes           = input(true, title='Display Trade Boxes'            , 
 i_displayHistoricalBoxes = input(false, title='Display Historical Trade Boxes' , group='Chart Pattern Recognition')
 
 // ARRAYS
-// Define arrays to store pivot values6
 // PIVOTS
 var pivotHighValuesC = array.new_float(0)
 var pivotLowValuesC  = array.new_float(0)
 // BASE PATTERN
+// Prices
+var baseBeginingY       = array.new_float(0)
+var lowOfBase           = array.new_float(0)
+var pivotHighValuesLow  = array.new_float(0) // For Double Bottom
+// Bars
 var int baseBeginingX   = 0
-var baseBeginingY   = array.new_float(0)
-var lowOfBase       = array.new_float(0)
-var pivotHighValuesLow  = array.new_float(0)
 var pivotHighBar        = array.new_int(0)
 var pivotLowBar         = array.new_int(0)
 // DOUBLE BOTTOM PATTERN
+// Prices
 var highOfDoubleBottom  = array.new_float(0)
 var lowOfDoubleBottom   = array.new_float(0)
+// Bars
 var int DBBeginingX     = 0
+var int DBBottomX       = 0
 
 
 // PIVOTS HIGH/LOW
@@ -531,15 +535,15 @@ if (pivotLow)
     array.unshift(pivotLowBar, bar_index[i_pivot])
 
 
-// Detection of a Pivot High for the detection of the base
+// Calculation for the detection of the base
 boolHighbase   = false
 boolHigherPiv  = false
 highestOfBase  = ta.highest(high, 25 )
 highestOfHist  = ta.highest(high, 50 )
 lowestBaseLow  = ta.lowest (low , 25 )
 lowestPointLeg = ta.lowest (low , 103)
-var flatBaseCond   = false
-isFlatBase         = false
+var baseCond   = false
+isBase         = false
 
 
 // CONDITIONS FOR BASE DETECTION
@@ -548,59 +552,37 @@ if(array.size(pivotHighValuesC) > 2)
     boolHighbase  := high[25]==array.get(pivotHighValuesC, 0) or  high[25]==array.get(pivotHighValuesC, 1) or high[25]==array.get(pivotHighValuesC, 2)
     boolHigherPiv := high[25]>=highestOfHist
     // Minimal Leg Up Calculation
-    legUp     = lowestPointLeg * (15+100)/100
-    legUpCond = high[25] >= legUp
+    legUp          = lowestPointLeg * (15+100)/100
+    legUpCond      = high[25] >= legUp
     // Maximal Base Depth
     firstBaseDepth = high[25] * (100-35)/100 <= lowestBaseLow
     // No candle is above high[25]
-    noCandleAbove = highestOfBase <= high[25]
+    noCandleAbove  = highestOfBase <= high[25]
+    // The candle of the begining of the base isn't in a previous base
+    noBaseInBase   = isBase[25] == false
     // Every Conditions with spikes for detection
-    flatBaseCond := boolHighbase and boolHigherPiv and legUpCond and firstBaseDepth and noCandleAbove
+    baseCond := boolHighbase and boolHigherPiv and legUpCond and firstBaseDepth and noCandleAbove and noBaseInBase
 
 // If Base Detected we store key points
-if (flatBaseCond and not isFlatBase[1])
+if (baseCond and not isBase[1])
     array.unshift(baseBeginingY, high[25])
     baseBeginingX := bar_index[25]
     array.unshift(lowOfBase    , lowestBaseLow)
 
 // Bool for Actual base that stay at 1 while the base is still valid
-if (flatBaseCond or isFlatBase[1])
-    isFlatBase := true
+if (baseCond or isBase[1])
+    isBase := true
 
 
 // Candle Base Counter
-var float baseCount    = na
+var int baseCount    = na
 // When a base is detected, reset the bar count
-if (flatBaseCond and not isFlatBase[1])
+if (baseCond and not isBase[1])
     baseCount := bar_index-baseBeginingX
 // Increment the bar count if we are in a base
-if (isFlatBase)
+if (isBase)
     baseCount := baseCount + 1
 
-// Check if the base is still valid
-float pivotBase  = 0
-float bottomBase = 0
-if (array.size(baseBeginingY)>0 and array.size(lowOfBase)>0)
-    pivotBase  := array.get(baseBeginingY, 0)
-    bottomBase := array.get(lowOfBase    , 0)
-condBaseDepthExceeded = (pivotBase*(100-35)/100 >= lowestBaseLow)
-if (isFlatBase)
-    if (high>pivotBase)
-        isFlatBase := false
-    if (low<bottomBase and not condBaseDepthExceeded)
-        array.unshift(lowOfBase, low)
-    if (condBaseDepthExceeded)
-        isFlatBase := false
-
-
-// Maintenance
-// plot(isFlatBase ? 135:130, color=color.lime)
-// plot(baseCount, color=color.red)
-// plot(flatBaseCond ? 65:50, color=color.purple)
-// Detail of Detection Spike
-// plot(legUpCond ? 9:6, color=color.red)
-// plot(firstBaseDepth ? 9:6, color=color.blue)
-// plot(noCandleAbove ? 9:6, color=color.purple)
 
 // Boolean for Box Gestion
 isBox   = false
@@ -610,7 +592,7 @@ if(isBox[1] and not boxOver[1])
 
 // CONDITIONS FOR DOUBLE BOTTOM DETECTION
 detectDoubleBottom = false
-if(isFlatBase)
+if(isBase)
     if (array.size(pivotHighValuesC) > 1 and array.size(pivotLowValuesC) > 1)
         firstPivHigh = array.get(pivotHighValuesC, 1)
         scndPivHigh  = array.get(pivotHighValuesC, 0)
@@ -633,7 +615,11 @@ if(isFlatBase)
         condTimeB    = frthPivTime - firstPivTime <= 100
         condTimeC    = (thrdPivTime-firstPivTime) * 2 >= (bar_index-thrdPivTime) // Pattern Propreties A-C x 2 > E-D
         condTimeD    = (thrdPivTime-firstPivTime) <= (bar_index-thrdPivTime) * 2 // Same as above but for the other side
-        if (condPricesA and condPricesB and condPricesC and condPricesD and condPricesE and condPricesF and condTimeA and condTimeB and condTimeC and condTimeD)
+        // Time and Price Conditions
+        condBothA    = ta.highest(high, bar_index-frthPivTime) <= scndPivHigh
+        // Here we use bars between the two first legs. For the 2 last legs it will be done later as the pattern is being created
+        condTimeE    = scndPivTime-firstPivTime <= 2 * (thrdPivTime-scndPivTime) and thrdPivTime-scndPivTime <= (scndPivTime-firstPivTime) *2
+        if (condPricesA and condPricesB and condPricesC and condPricesD and condPricesE and condPricesF and condTimeA and condTimeB and condTimeC and condTimeD and condTimeE and condBothA)
             detectDoubleBottom := true
             array.unshift(lowOfDoubleBottom, scndPivLow)
             array.unshift(highOfDoubleBottom, firstPivHigh)
@@ -643,10 +629,6 @@ if(isFlatBase)
 isDoubleBottom = false
 if (detectDoubleBottom or isDoubleBottom[1])
     isDoubleBottom := true
-
-// Maintenance
-// plot(detectDoubleBottom ? 139:120, color=color.red)
-// plot(isDoubleBottom ? 145:140, color=color.blue)
 
 // Graphical Objects Declaration
 // Horizontal Lines
@@ -662,8 +644,8 @@ var box slBox    = na
 var box tpBox    = na
 
 
-// DRAWING ON CHART IF DETECTION
-if (flatBaseCond and not isFlatBase[1] and timeframe.isdaily and i_displayPattern)
+// DRAWING BASE ON CHART IF DETECTION
+if (baseCond and not isBase[1] and timeframe.isdaily and i_displayPattern)
     highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
     lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase    , 0), x2=bar_index, y2=array.get(lowOfBase   , 0),  width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
     select = i_displayHistoricalBoxes ? false:boxOver
@@ -675,15 +657,25 @@ if (flatBaseCond and not isFlatBase[1] and timeframe.isdaily and i_displayPatter
         isBox   := false
         boxOver := true
 
+
 // DRAWING DOUBLE BOTTOM ON CHART IF DETECTION
+lowCompare = baseCount > 0 ? ta.lowest(low, baseCount):low
 if (detectDoubleBottom and not isDoubleBottom[1]  and timeframe.isdaily and i_displayPattern)
     line.delete(highLine)
     line.delete(lowLine )
+    DBBottomX := array.get(pivotLowBar,  0)
+    // If Lower Low But Double Bottom Still valid
+    if (array.size(lowOfDoubleBottom) > 0)
+        if (lowCompare < array.get(lowOfDoubleBottom, 0))
+            array.unshift(lowOfDoubleBottom, lowCompare)
+            DBBottomX := bar_index - ta.barssince(low==lowCompare)
+            if (low[1] == array.get(lowOfDoubleBottom, 0))
+                DBBottomX := bar_index[1]
     highLine := line.new(x1=array.get(pivotHighBar, 0), y1=array.get(pivotHighValuesC, 0), x2=bar_index, y2=array.get(pivotHighValuesC, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-    dbLine1 := line.new(x1=array.get(pivotHighBar, 1), y1=array.get(pivotHighValuesLow, 1)*(100-1)/100, x2=array.get(pivotLowBar,  1), y2=array.get(pivotLowValuesC,  1)*(100-1)/100    , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
-    dbLine2 := line.new(x1=array.get(pivotLowBar,  1), y1=array.get(pivotLowValuesC,     1)*(100-1)/100, x2=array.get(pivotHighBar, 0), y2=array.get(pivotHighValuesLow, 0)*(100-1)/100 , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
-    dbLine3 := line.new(x1=array.get(pivotHighBar, 0), y1=array.get(pivotHighValuesLow, 0)*(100-1)/100, x2=array.get(pivotLowBar,  0), y2=array.get(pivotLowValuesC, 0)*(100-1)/100     , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
-    lowLine := line.new(x1=array.get(pivotLowBar,  0), y1=array.get(pivotLowValuesC,     0)*(100-1)/100, x2=bar_index                 , y2=low*(100-1)/100                    , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    dbLine1 := line.new(x1=array.get(pivotHighBar, 1), y1=array.get(pivotHighValuesLow, 1)*(100-1)/100 , x2=array.get(pivotLowBar,  1), y2=array.get(pivotLowValuesC,  1)*(100-1)/100    , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    dbLine2 := line.new(x1=array.get(pivotLowBar,  1), y1=array.get(pivotLowValuesC,     1)*(100-1)/100, x2=array.get(pivotHighBar, 0), y2=array.get(pivotHighValuesLow, 0)*(100-1)/100  , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    dbLine3 := line.new(x1=array.get(pivotHighBar, 0), y1=array.get(pivotHighValuesLow, 0)*(100-1)/100 , x2=DBBottomX                 , y2=array.get(lowOfDoubleBottom,  0)*(100-1)/100  , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    lowLine := line.new(x1=DBBottomX                 , y1=array.get(lowOfDoubleBottom,  0)*(100-1)/100 , x2=bar_index                 , y2=low * (100-1)/100                             , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
     select = i_displayHistoricalBoxes ? false:boxOver
     // Optional Trade Boxes
     if(select)
@@ -694,8 +686,8 @@ if (detectDoubleBottom and not isDoubleBottom[1]  and timeframe.isdaily and i_di
         boxOver := true
 
 // Check Top Break
-if (high>line.get_y1(highLine) and (isFlatBase[1] or isDoubleBottom[1]))
-    isFlatBase := false  
+if (high>line.get_y1(highLine) and (isBase[1] or isDoubleBottom[1]))
+    isBase := false  
     if (isDoubleBottom)
         isDoubleBottom := false
     if(i_displayBoxes)
@@ -718,7 +710,7 @@ if (array.size(lowOfDoubleBottom) > 0)
         isDoubleBottom := false
         // Redraw Original base if Double Bottom disabled
         highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-        lowLine  := line.new(x1=baseBeginingX, y1=low                        , x2=bar_index, y2=low                        ,  width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
+        lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase,     0), x2=bar_index, y2=array.get(lowOfBase,     0), width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
 // Check Double Bottom base Length
 if (isDoubleBottom and bar_index-DBBeginingX>100)
     line.delete(highLine)
@@ -739,23 +731,23 @@ if (isDoubleBottom and (thrdPivTime-firstPivTime) * 2 <= bar_index-thrdPivTime o
     isDoubleBottom := false
     // Redraw Original base if Double Bottom disabled
     highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-    lowLine  := line.new(x1=baseBeginingX, y1=low                        , x2=bar_index, y2=low                        ,  width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
+    lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase,     0), x2=bar_index, y2=array.get(lowOfBase,     0), width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
 
 // Adjust Bottom of Base
-if (low < line.get_y1(lowLine) and isFlatBase and not isDoubleBottom)
+if (low < line.get_y1(lowLine) and isBase and not isDoubleBottom)
     line.set_y1(lowLine, low)
     line.set_y2(lowLine, low)
 // Check Max Depth and Max Length
-if ((low < line.get_y1(highLine) * (100-35)/100 or baseCount>75) and isFlatBase[1] and not isDoubleBottom[1])
+if ((low < line.get_y1(highLine) * (100-40)/100 or baseCount>150) and isBase[1] and not isDoubleBottom[1])
     line.delete(highLine)
     line.delete(lowLine)
-    isFlatBase    := false
-// Check Depth of base to adjust style of line (Depth above 20% = Dotted Line)
-if (line.get_y1(highLine) * 0.8 >= line.get_y1(lowLine) and isFlatBase and not isDoubleBottom)
+    isBase    := false
+// Check Depth of base to adjust style of line (Depth above 15% = Dotted Line, defined as flat base by IBD)
+if (line.get_y1(highLine) * 0.85 >= line.get_y1(lowLine) and isBase and not isDoubleBottom)
     line.set_style(lowLine, line.style_dotted)
     line.set_width(lowLine, 3)
 // While the base is still valid, we extend lines
-if (high<=line.get_y1(highLine) and low>=line.get_y1(lowLine) and isFlatBase)
+if (high<=line.get_y1(highLine) and low>=line.get_y1(lowLine) and isBase)
     line.set_x2(highLine, bar_index)
     if (isDoubleBottom)
         line.set_y2(lowLine, low*(100-1)/100)
