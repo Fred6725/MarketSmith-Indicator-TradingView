@@ -2,13 +2,13 @@
 // 
 
 //@version=5
-indicator("MarketSmith Indicator", overlay=true, max_bars_back = 253, max_lines_count = 150, max_labels_count = 300, max_boxes_count = 120)
+indicator('MarketSmith Indicator', overlay=true, max_bars_back = 500, max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
 
 //------------------  BARS ---------------------//
 // Color of bars
-prevClose   = input(true, title='Color Based On Previous Close',  group="----------BARS----------", inline="x")
-i_posColor = input(color.rgb(0, 0, 255)   , title='Candle Color Positive', group="----------BARS----------", inline = "1")
-i_negColor = input(color.rgb(222,50,174,0), title='Negative', group="----------BARS----------", inline = "1")
+prevClose   = input(true, title='Color Based On Previous Close',  group='----------BARS----------', inline='x')
+i_posColor = input(color.rgb(39, 54,233,0), title='Candle Color Positive', group='----------BARS----------', inline = '1')
+i_negColor = input(color.rgb(222,50,174,0), title='Negative', group='----------BARS----------', inline = '1')
 colorCandle = close>=open ? i_posColor:i_negColor
 if(prevClose)
     colorCandle := close>=close[1] ? i_posColor:i_negColor
@@ -19,40 +19,40 @@ plotchar(close, char='-', location=location.absolute, size=size.small, color=col
 
 //------------------  SMA's ---------------------//
 // Input SMA for Daily TF and others
-iSma10    = input(true, title='MA 1',  group="----------SMAs----------", inline="sma10")
-iSmaV10   = input(10, title='Lenght',  group="----------SMAs----------", inline="sma10")
-iExp10    = input(true, title='Exponential',  group="----------SMAs----------", inline="sma10")
-iCol10    = input(color.rgb(68,186,76), title="", group="----------SMAs----------", inline="sma10")
-iSma21    = input(true, title='MA 2',  group="----------SMAs----------", inline="sma21")
-iSmaV21   = input(21, title='Lenght',  group="----------SMAs----------", inline="sma21")
-iExp21    = input(true, title='Exponential',  group="----------SMAs----------", inline="sma21")
-iCol21    = input(color.rgb(240,141,240,0), title="", group="----------SMAs----------", inline="sma21")
-iSma50    = input(true, title='MA 3',  group="----------SMAs----------", inline="sma50")
-iSmaV50   = input(50, title='Lenght',  group="----------SMAs----------", inline="sma50")
-iExp50    = input(false, title='Exponential',  group="----------SMAs----------", inline="sma50")
-iCol50    = input(color.rgb(255,33,33), title="", group="----------SMAs----------", inline="sma50")
-iSma200   = input(true, title='MA 4', group="----------SMAs----------", inline="sma200")
-iSmaV200  = input(200, title='Lenght',  group="----------SMAs----------", inline="sma200")
-iExp200   = input(false, title='Exponential',  group="----------SMAs----------", inline="sma200")
-iCol200    = input(color.rgb(0,0,0,0), title="", group="----------SMAs----------", inline="sma200")
+iSma10    = input(true, title='MA 1',  group='----------SMAs----------', inline='sma10')
+iSmaV10   = input(10, title='Lenght',  group='----------SMAs----------', inline='sma10')
+iExp10    = input(true, title='Exponential',  group='----------SMAs----------', inline='sma10')
+iCol10    = input(color.rgb(68,186,76), title='', group='----------SMAs----------', inline='sma10')
+iSma21    = input(true, title='MA 2',  group='----------SMAs----------', inline='sma21')
+iSmaV21   = input(21, title='Lenght',  group='----------SMAs----------', inline='sma21')
+iExp21    = input(true, title='Exponential',  group='----------SMAs----------', inline='sma21')
+iCol21    = input(color.rgb(240,141,240,0), title='', group='----------SMAs----------', inline='sma21')
+iSma50    = input(true, title='MA 3',  group='----------SMAs----------', inline='sma50')
+iSmaV50   = input(50, title='Lenght',  group='----------SMAs----------', inline='sma50')
+iExp50    = input(false, title='Exponential',  group='----------SMAs----------', inline='sma50')
+iCol50    = input(color.rgb(255,33,33), title='', group='----------SMAs----------', inline='sma50')
+iSma200   = input(true, title='MA 4', group='----------SMAs----------', inline='sma200')
+iSmaV200  = input(200, title='Lenght',  group='----------SMAs----------', inline='sma200')
+iExp200   = input(false, title='Exponential',  group='----------SMAs----------', inline='sma200')
+iCol200    = input(color.rgb(0,0,0,0), title='', group='----------SMAs----------', inline='sma200')
 
 // Input SMA for Weekly TimeFrame
-iSma10We    = input(true, title='SMA 1',  group="----------SMAs We----------", inline="sma10We")
-iSmaV10We   = input(10, title='Lenght',  group="----------SMAs We----------", inline="sma10We")
-iExp10We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma10We")
-iCol10We    = input(color.rgb(255,33,33), title="", group="----------SMAs We----------", inline="sma10We")
-iEma20We    = input(true, title='EMA 2',  group="----------SMAs We----------", inline="ema20We")
-iSmaV20We   = input(20, title='Lenght',  group="----------SMAs We----------", inline="ema20We")
-iExp20We    = input(true, title='Exponential',  group="----------SMAs We----------", inline="ema20We")
-iCol20We    = input(color.rgb(240,141,240,0), title="", group="----------SMAs We----------", inline="ema20We")
-iSma30We    = input(true, title='SMA 3',  group="----------SMAs We----------", inline="sma30We")
-iSmaV30We   = input(30, title='Lenght',  group="----------SMAs We----------", inline="sma30We")
-iExp30We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma30We")
-iCol30We    = input(color.rgb(68,186,76), title="", group="----------SMAs We----------", inline="sma30We")
-iSma40We    = input(true, title='SMA 4',  group="----------SMAs We----------", inline="sma40We")
-iSmaV40We   = input(40, title='Lenght',  group="----------SMAs We----------", inline="sma40We")
-iExp40We    = input(false, title='Exponential',  group="----------SMAs We----------", inline="sma40We")
-iCol40We    = input(color.rgb(0,0,0,0), title="", group="----------SMAs We----------", inline="sma40We")
+iSma10We    = input(true, title='SMA 1',  group='----------SMAs We----------', inline='sma10We')
+iSmaV10We   = input(10, title='Lenght',  group='----------SMAs We----------', inline='sma10We')
+iExp10We    = input(false, title='Exponential',  group='----------SMAs We----------', inline='sma10We')
+iCol10We    = input(color.rgb(255,33,33), title='', group='----------SMAs We----------', inline='sma10We')
+iEma20We    = input(true, title='EMA 2',  group='----------SMAs We----------', inline='ema20We')
+iSmaV20We   = input(20, title='Lenght',  group='----------SMAs We----------', inline='ema20We')
+iExp20We    = input(true, title='Exponential',  group='----------SMAs We----------', inline='ema20We')
+iCol20We    = input(color.rgb(240,141,240,0), title='', group='----------SMAs We----------', inline='ema20We')
+iSma30We    = input(true, title='SMA 3',  group='----------SMAs We----------', inline='sma30We')
+iSmaV30We   = input(30, title='Lenght',  group='----------SMAs We----------', inline='sma30We')
+iExp30We    = input(false, title='Exponential',  group='----------SMAs We----------', inline='sma30We')
+iCol30We    = input(color.rgb(68,186,76), title='', group='----------SMAs We----------', inline='sma30We')
+iSma40We    = input(true, title='SMA 4',  group='----------SMAs We----------', inline='sma40We')
+iSmaV40We   = input(40, title='Lenght',  group='----------SMAs We----------', inline='sma40We')
+iExp40We    = input(false, title='Exponential',  group='----------SMAs We----------', inline='sma40We')
+iCol40We    = input(color.rgb(0,0,0,0), title='', group='----------SMAs We----------', inline='sma40We')
 
 
 // SMA calculation Daily & others TF
@@ -92,33 +92,51 @@ psma40We =  plot(iSma40We and tfWeekly  ? sma40We:na, linewidth=1, color=iCol40W
 // © RaviYendru thanks for providing the intial script
 // Fred6724 - Let's see if it is possible to get better results
 
-hideRSLine  = input(false, title="Hide RS Line", group="----------RS Rating----------", inline="0")
-hideRSRat   = input(false, title="Hide Rating", group = "----------RS Rating----------", inline="0")
-//seedetail   = input(false, title="Display the 3 results", group = "Parameters", inline="0")
-src         = close
-comparativeTickerId = input("SP:SPX", title="Comparative Symbol", group = "----------RS Rating----------", tooltip = "Reference ticker used for calculation of the RS Line and RS Score.")
-SpxValue    = input(4400, title="Value of Comparative Symbol", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price. If you modify the ticker, please report its value in this box.")
-offset      = input.int(80, minval = 0, maxval = 300, title="Offset (%)", group = "----------RS Rating----------", tooltip = "Used to display the RS Line under the price.")
-colorRS     = input(color.rgb(0, 0, 255), title = "Color of RS Line & Rating", group = "----------RS Rating----------")
-plotNewHigh = input(false, title = "Plot RS New Highs", group = "----------RS Rating----------")
-rsNewHigh   = input.string("Historical RS New Highs", title = "Type", options=["RS New Highs","RS New Highs Before Price", "Historical RS New Highs", "Historical RS New Highs  Before Price"], group = "----------RS Rating----------")
-blueDotCol  = input(color.rgb(121, 213, 242,62), title = "Color of Dots", group = "----------RS Rating----------")
-lookback    = input.int(250, title = "Look-back", minval = 1, maxval = 252, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Highs.")
-sizeLabHigh = input.string('Tiny', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "----------RS Rating----------")
-plotNewLow  = input(false, title = "Plot RS New Lows", group = "----------RS Rating----------")
-rsNewLow    = input.string("Historical RS New Lows", title = "Type", options=["RS New Lows","RS New Lows Before Price", "Historical RS New Lows", "Historical RS New Lows  Before Price"], group = "----------RS Rating----------")
-redDotCol   = input(color.rgb(255, 82, 82, 62), title = "Color", group = "----------RS Rating----------")
-lookback2   = input.int(250, title = "Look-back", minval = 1, maxval = 252, group = "----------RS Rating----------", tooltip = "The lookback for calculation of price and RS New Lows.")
-sizeLabLow  = input.string('Tiny', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = "----------RS Rating----------")
-boolMa      = input(false, title = "Display MA", group = "MA on RS Line")
-lenMa       = input(21, title = "Lenght Da", group = "MA on RS Line", inline = "c")
-colMa       = input(color.orange, title = "Color", group = "MA on RS Line", inline = "c")
-typMa       = input.string("EMA", title = "Type Da", options = ["SMA", "EMA"], group = "MA on RS Line", inline = "c")
-lenMaWe     = input(10, title = "Lenght We", group = "MA on RS Line", inline = "c")
-typMaWe     = input.string("SMA", title = "Type We", options = ["SMA", "EMA"], group = "MA on RS Line", inline = "c")
-fillMa      = input(false, title = "Area Color", group = "MA on RS Line")
-posCol      = input(color.rgb(0, 230, 119, 75), title = "Positive Area", group = "MA on RS Line", inline = "d")
-negCol      = input(color.rgb(255, 82, 82, 75),  title = "Negative Area", group = "MA on RS Line", inline = "d")
+// Constant Value
+comparativeTickerId = 'SP:SPX'  // For RS Score Calculation, the SPX Value only makes sens because of the GitHub project
+
+
+hideRSLine  = input(false, title='Hide RS Line', group='----------RS Rating----------', inline='0')
+hideRSRat   = input(false, title='Hide Rating', group = '----------RS Rating----------', inline='0')
+//seedetail   = input(false, title='Display the 3 results', group = 'Parameters', inline='0')
+ratingOnly  = input(false, title='Rating Only', group = '----------RS Rating----------')
+lineTicker  = input('SP:SPX', title='Comparative Symbol for Line', group = '----------RS Rating----------', tooltip = 'Reference ticker used for calculation of the RS Line.')
+SpxValue    = input(4200, title='Value of Comparative Symbol', group = '----------RS Rating----------', tooltip = 'Used to gather a constant value')
+offset      = input.int(80, minval = 0, maxval = 300, title='Offset (%)', group = '----------RS Rating----------', tooltip = 'Used to display the RS Line under the price.')
+colorRS     = input(color.rgb(0, 0, 255), title = 'Color of RS Line & Rating', group = '----------RS Rating----------')
+plotNewHigh = input(true, title = 'Plot RS New Highs', group = '----------RS Rating----------')
+rsNewHigh   = input.string('RS New Highs', title = 'Type', options=['RS New Highs','RS New Highs Before Price', 'Historical RS New Highs', 'Historical RS New Highs  Before Price'], group = '----------RS Rating----------')
+blueDotCol  = input(color.rgb(121, 213, 242,62), title = 'Color of Dots', group = '----------RS Rating----------')
+lookback    = input.int(250, title = 'Look-back', minval = 1, maxval = 252, group = '----------RS Rating----------', tooltip = 'The lookback for calculation of price and RS New Highs.')
+sizeLabHigh = input.string('Tiny', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = '----------RS Rating----------')
+plotNewLow  = input(false, title = 'Plot RS New Lows', group = '----------RS Rating----------')
+rsNewLow    = input.string('Historical RS New Lows', title = 'Type', options=['RS New Lows','RS New Lows Before Price', 'Historical RS New Lows', 'Historical RS New Lows  Before Price'], group = '----------RS Rating----------')
+redDotCol   = input(color.rgb(255, 82, 82, 62), title = 'Color', group = '----------RS Rating----------')
+lookback2   = input.int(250, title = 'Look-back', minval = 1, maxval = 252, group = '----------RS Rating----------', tooltip = 'The lookback for calculation of price and RS New Lows.')
+sizeLabLow  = input.string('Tiny', title = 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = '----------RS Rating----------')
+boolMa      = input(false, title = 'Display MA 1 on RS Line', group = '1st MA on RS Line')
+lenMa       = input(21, title = 'Lenght Da', group = '1st MA on RS Line', inline = 'c')
+colMa       = input(color.orange, title = 'Color', group = '1st MA on RS Line', inline = 'c')
+typMa       = input.string('EMA', title = 'Type Da', options = ['SMA', 'EMA'], group = '1st MA on RS Line', inline = 'c')
+lenMaWe     = input(10, title = 'Lenght We', group = '1st MA on RS Line', inline = 'c')
+typMaWe     = input.string('SMA', title = 'Type We', options = ['SMA', 'EMA'], group = '1st MA on RS Line', inline = 'c')
+fillMa      = input(false, title = 'Area Color', group = '1st MA on RS Line')
+posCol      = input(color.rgb(0, 230, 119, 75), title = 'Positive Area', group = '1st MA on RS Line', inline = 'd')
+negCol      = input(color.rgb(255, 82, 82, 75),  title = 'Negative Area', group = '1st MA on RS Line', inline = 'd')
+boolMa2     = input(false, title = 'Display MA 2 on RS Line', group = '2nd MA on RS Line')
+lenMa2      = input(50, title = 'Lenght Da', group = '2nd MA on RS Line', inline = 'c')
+colMa2      = input(color.red, title = 'Color', group = '2nd MA on RS Line', inline = 'c')
+typMa2      = input.string('EMA', title = 'Type Da', options = ['SMA', 'EMA'], group = '2nd MA on RS Line', inline = 'c')
+lenMa2We    = input(21, title = 'Lenght We', group = '2nd MA on RS Line', inline = 'c')
+typMa2We    = input.string('SMA', title = 'Type We', options = ['SMA', 'EMA'], group = '2nd MA on RS Line', inline = 'c')
+allowReplay = input(false, title = 'Use fix values for replay mode', group = 'RS Replay mode (Approximate Method)', tooltip = 'Here we use constant values in order to provide the environment regardless of the date. See RSRATING ticker and report close values to have the last data.')
+first2      = input(195.93, title='For 99 stocks' , group = 'RS Replay mode (Approximate Method)')
+scnd2       = input(117.11, title='For 90+ stocks', group = 'RS Replay mode (Approximate Method)')
+thrd2       = input(99.04, title='For 70+ stocks' , group = 'RS Replay mode (Approximate Method)')
+frth2       = input(91.66, title='For 50+ stocks' , group = 'RS Replay mode (Approximate Method)')
+ffth2       = input(80.96, title='For 30+ stocks' , group = 'RS Replay mode (Approximate Method)')
+sxth2       = input(53.64, title='For 10+ stocks' , group = 'RS Replay mode (Approximate Method)')
+svth2       = input(24.86, title='For 1- stocks'  , group = 'RS Replay mode (Approximate Method)')
 
 // Blue Dot
 // If Blue Dot is ste to 250 Da, than we want it to be set on 52 We on the Weekly TimeFrame
@@ -151,25 +169,28 @@ n252     = bar_index < 252 ? bar_index:252
 // Comparative Ticker for RS Line
 comparativeSymbol   = request.security(comparativeTickerId, timeframe.period, close)
 // RS Line but multiplied by a little bit less than the constant value of the comparative ticker for correct display
-rsCurve             = (src/comparativeSymbol)
+rsCurve             = (close/comparativeSymbol)
+// Adapt Ratio for Sectors and Indices
+if (syminfo.industry == 'Investment Trusts/Mutual Funds')
+    offset := 90
 // We use a wider offset for Weekly timeframe for a smoother display
 rsRatio             = timeframe.isweekly ? SpxValue*(offset-10)/100:SpxValue*offset/100
 rs                  = rsCurve*rsRatio
 prevlookback  = lookback
 prevlookback2 = lookback2 // For RS New Lows
 lookback := math.min(lookback - 1, bar_index)
-rsPlot = plot(hideRSLine ? na:rs, title="RS Line", style=plot.style_line, linewidth=1, color=colorRS)
+rsPlot = plot(hideRSLine ? na:rs, title='RS Line', style=plot.style_line, linewidth=1, color=colorRS)
 
-// MA on RS Line
+// 1st MA on RS Line
 // SMA and EMA
 rsMA      = ta.sma(rs, lenMa)
-if(typMa == "SMA" and not timeframe.isweekly)
+if(typMa == 'SMA' and not timeframe.isweekly)
     rsMA      := ta.sma(rs, lenMa)
-if(typMa == "EMA" and not timeframe.isweekly)  
+if(typMa == 'EMA' and not timeframe.isweekly)  
     rsMA      := ta.ema(rs, lenMa)
-if(typMaWe == "SMA" and timeframe.isweekly)
+if(typMaWe == 'SMA' and timeframe.isweekly)
     rsMA      := ta.sma(rs, lenMaWe)
-if(typMaWe == "EMA" and timeframe.isweekly)
+if(typMaWe == 'EMA' and timeframe.isweekly)
     rsMA      := ta.ema(rs, lenMaWe)
 
 maPlot    = plot(boolMa ? rsMA :na,    color = colMa, linewidth = 1)
@@ -182,6 +203,20 @@ fillCol = rs > rsMA ? posCol:negCol
 // Here if a MA is missing, there is no fill
 fill(rsPlot, maPlot2 ,   color=fillCol)
 
+// 2nd MA on RS Line
+// SMA and EMA
+rsMA2      = ta.sma(rs, lenMa2)
+if (typMa2 == 'SMA' and not timeframe.isweekly)
+    rsMA2      := ta.sma(rs, lenMa2)
+if (typMa2 == 'EMA' and not timeframe.isweekly)  
+    rsMA2      := ta.ema(rs, lenMa2)
+if (typMa2We == 'SMA' and timeframe.isweekly)
+    rsMA2      := ta.sma(rs, lenMa2We)
+if (typMa2We == 'EMA' and timeframe.isweekly)
+    rsMA2      := ta.ema(rs, lenMa2We)
+
+maPlot3  = plot(boolMa2 ? rsMA2 :na,    color = colMa2, linewidth = 1)
+
 
 
 // Historical New Highs & New Highs Before Price
@@ -189,17 +224,17 @@ var label newHigh = na
 histNH = ta.highest(rs  , prevlookback)
 histCl = ta.highest(high, prevlookback)
 // Historical RS New High
-if(rsNewHigh == "Historical RS New Highs" and plotNewHigh and rs == histNH)
+if(rsNewHigh == 'Historical RS New Highs' and plotNewHigh and rs == histNH)
     newHigh := label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = highLabel)
 // Historical RS New High Before Price
-if(rsNewHigh == "Historical RS New Highs  Before Price" and plotNewHigh and rs == histNH and high < histCl)
+if(rsNewHigh == 'Historical RS New Highs  Before Price' and plotNewHigh and rs == histNH and high < histCl)
     newHigh := label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = highLabel)
 // RS New High
-if(barstate.islast and rsNewHigh == "RS New Highs" and plotNewHigh and rs == histNH)
+if(barstate.islast and rsNewHigh == 'RS New Highs' and plotNewHigh and rs == histNH)
     label.delete(newHigh)
     newHigh := label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = highLabel)
 // RS New High Before Price
-if(barstate.islast and rsNewHigh == "RS New Highs Before Price" and plotNewHigh and rs == histNH and high < histCl)
+if(barstate.islast and rsNewHigh == 'RS New Highs Before Price' and plotNewHigh and rs == histNH and high < histCl)
     label.delete(newHigh)
     newHigh := label.new(x = bar_index, y = rs, color = blueDotCol, style = label.style_circle, size = highLabel)
 
@@ -209,17 +244,17 @@ var label newLow  = na
 histNL  = ta.lowest(rs , prevlookback2)
 histClL = ta.lowest(low, prevlookback2)
 // Historical RS New Low
-if(rsNewLow == "Historical RS New Lows" and plotNewLow and rs == histNL)
+if(rsNewLow == 'Historical RS New Lows' and plotNewLow and rs == histNL)
     newLow := label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = lowLabel)
 // Historical RS New Low Before Price
-if(rsNewLow == "Historical RS New Lows  Before Price" and plotNewLow and rs == histNL and low > histClL)
+if(rsNewLow == 'Historical RS New Lows  Before Price' and plotNewLow and rs == histNL and low > histClL)
     newLow := label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = lowLabel)
 // RS New Low
-if(barstate.islast and rsNewLow == "RS New Lows" and plotNewLow and rs == histNL)
+if(barstate.islast and rsNewLow == 'RS New Lows' and plotNewLow and rs == histNL)
     label.delete(newLow)
     newLow := label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = lowLabel)
 // RS New Low Before Price
-if(barstate.islast and rsNewLow == "RS New Lows Before Price" and plotNewLow and rs == histNL and low > histClL)
+if(barstate.islast and rsNewLow == 'RS New Lows Before Price' and plotNewLow and rs == histNL and low > histClL)
     label.delete(newLow)
     newLow := label.new(x = bar_index, y = rs, color = redDotCol, style = label.style_circle, size = lowLabel)
 
@@ -293,7 +328,7 @@ float totalRsRating = -1
 
 
 // Use the request.seed() function to access the RS Score environment of all the market
-curveRsPerf  = request.seed("seed_fred6725_rs_rating", "RSRATING", close)
+curveRsPerf  = request.seed('seed_fred6725_rs_rating', 'RSRATING', close)
 
 // To prevent loosing data because of week-ends and public holidays I decided to send the value 5 times in a row.
 // Which gives 5*7 = 35 bars.
@@ -310,21 +345,41 @@ var float[] different_values = array.new_float(7)
 // Counter for stored values
 var int counter = 0
 
-// Browse seed's values and store the first 7 different values
-for i = delta to 34+delta
-    close_value = nz(curveRsPerf[i])
-    if not array.includes(different_values, close_value) and counter < 7 and close_value!=0
-        array.set(different_values, counter, close_value)
-        counter := counter + 1
+// Variable for storage of the environment
+float first = 0
+float scnd  = 0
+float thrd  = 0
+float frth  = 0
+float ffth  = 0
+float sxth  = 0
+float svth  = 0
 
-// Assign stored values to variables
-first = array.get(different_values, 0)
-scnd  = array.get(different_values, 1)
-thrd  = array.get(different_values, 2)
-frth  = array.get(different_values, 3)
-ffth  = array.get(different_values, 4)
-sxth  = array.get(different_values, 5)
-svth  = array.get(different_values, 6)
+// Browse seed's values and store the first 7 different values
+if (not allowReplay)
+    for i = delta to 34+delta
+        close_value = nz(curveRsPerf[i])
+        if (not array.includes(different_values, close_value) and counter < 7 and close_value!=0)
+            array.set(different_values, counter, close_value)
+            counter := counter + 1
+
+    // Assign stored values to variables
+    first := array.get(different_values, 0)
+    scnd  := array.get(different_values, 1)
+    thrd  := array.get(different_values, 2)
+    frth  := array.get(different_values, 3)
+    ffth  := array.get(different_values, 4)
+    sxth  := array.get(different_values, 5)
+    svth  := array.get(different_values, 6)
+
+// Replay mode
+if (allowReplay)
+    first := first2
+    scnd  := scnd2 
+    thrd  := thrd2 
+    frth  := frth2 
+    ffth  := ffth2 
+    sxth  := sxth2 
+    svth  := svth2 
 
 // Now that we've recovered the environment, we can assign a percentile using a simple linear approximation of the curve (+ adjustment).
 if(totalRsScore >= first)
@@ -367,17 +422,27 @@ if (totalRsScore < sxth and totalRsScore >= svth)
     totalRsRating := f_attributePercentile(totalRsScore, sxth, svth, 9, 2, 0)
 
 
+// Check if one of this value is empty for replay mode
+for i = 0 to 6
+    if (nz(array.get(different_values, i)) == 0 and not allowReplay)
+        totalRsRating := -1
+
+
 // Display the RS Rating
 // The results can only be used in Daily TimeFrame
 isDaily = timeframe.isdaily
-labelText1 = "RS Rating"
-labelText2 = ""
+labelText1 = '                RS Rating'
+labelText2 = ''
 // Here we want to display 'RS' without value if one of the constants is missing
 if(isDaily and totalRsRating != -1)
-    labelText2 := "\n\n"+str.tostring(totalRsRating,"#0")
+    labelText2 := '\n\n       '+str.tostring(totalRsRating,'#0')
+// Rating Only
+if (ratingOnly)
+    labelText1 := ''
+    labelText2 := '\n    '+str.tostring(totalRsRating,'#0')
 // Display the labels
-label1 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText1 , color = color.rgb(0,0,0,100), size=size.normal, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
-label2 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText2 , color = color.rgb(0,0,0,100), size=size.large, textcolor=colorRS, style=label.style_label_left, textalign=text.align_left, yloc=yloc.price) : na
+label1 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText1 , color = color.rgb(0,0,0,100), size=size.normal, textcolor=colorRS, style=label.style_label_center, textalign=text.align_left, yloc=yloc.price) : na
+label2 = (hideRSRat == false) and barstate.islast ? label.new(bar_index, rs, text=labelText2 , color = color.rgb(0,0,0,100), size=size.large,  textcolor=colorRS, style=label.style_label_center, textalign=text.align_left, yloc=yloc.price) : na
 
 // Delete previous Labels (When new candle opens or when replay mode, the labels were piling on)
 label.delete(label1[1])
@@ -386,8 +451,8 @@ label.delete(label2[1])
 
 // Weekly Tight Closes Detector
 //input
-WtClose          = input(false, title='Weekly Tight Closes Detector', group="TIGHT CLOSES DETECTOR")
-colorTightCloses = input(color.aqua, title='Color of Tight Closes Boxes', group="TIGHT CLOSES DETECTOR")
+WtClose          = input(false, title='Weekly Tight Closes Detector', group='TIGHT CLOSES DETECTOR')
+colorTightCloses = input(color.aqua, title='Color of Tight Closes Boxes', group='TIGHT CLOSES DETECTOR')
 // Calculation
 if(tfWeekly)
     // Open
@@ -445,12 +510,12 @@ if(tfWeekly)
 // the 9 days following that date.
 
 // Inputs
-i_displayHL = input(true, title="Display H/L Points", group="High/Low Price Points")
-i_colorHL   = input(color.rgb(0,0,0,0), title='Labels Color', group="High/Low Price Points")
-i_displayPc = input(false, title="%Change", group='High/Low Price Points')
-i_colorPctP = input(color.rgb(0, 0, 255), title='Positive % Color', group="High/Low Price Points", inline = "z")
-i_colorPctN = input(color.rgb(222,50,174,0), title='Negative %', group="High/Low Price Points", inline = "z")
-i_pivot     = input(9, title="Length for peak/valey points", group="High/Low Price Points")
+i_displayHL = input(true, title='Display H/L Points', group='High/Low Price Points')
+i_colorHL   = input(color.rgb(0,0,0,0), title='Labels Color', group='High/Low Price Points')
+i_displayPc = input(false, title='%Change', group='High/Low Price Points')
+i_colorPctP = input(color.rgb(0, 0, 255), title='Positive % Color', group='High/Low Price Points', inline = 'z')
+i_colorPctN = input(color.rgb(222,50,174,0), title='Negative %', group='High/Low Price Points', inline = 'z')
+i_pivot     = input(9, title='Length for peak/valey points', group='High/Low Price Points')
 
 // Definr arrays to store pivot values
 var pivotHighValues = array.new_float(0)
@@ -468,7 +533,7 @@ if(i_displayHL and not tfWeekly)
     // Low Price Point
     if(pivotLow)
         array.unshift(pivotLowValues, low[i_pivot])    //low[i_pivot]
-        textLow9    = "\n" + str.tostring(low[i_pivot], '0.00')
+        textLow9    = '\n' + str.tostring(low[i_pivot], '0.00')
         lowestLow   = label.new(bar_index-i_pivot, array.get(pivotLowValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text=textLow9, textcolor=i_colorHL, color=color.rgb(0,0,0,100))
     // Percentage Variation
     float pHigh = na
@@ -487,7 +552,7 @@ if(i_displayHL and not tfWeekly)
     if(pivotHigh and i_displayPc)
         pctPivotHigh = na(prcVarHigh)==true ? na:label.new(bar_index-i_pivot, array.get(pivotHighValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, text=prcVarHighText, textcolor=colorPctUp)
     if(pivotLow and i_displayPc)
-        pctPivotLow  = na(prcVarLow)==true ? na:label.new(bar_index-i_pivot, array.get(pivotLowValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text="\n\n\n" + prcVarLowText, textcolor=colorPctDn, color=color.rgb(0,0,0,100))
+        pctPivotLow  = na(prcVarLow)==true ? na:label.new(bar_index-i_pivot, array.get(pivotLowValues, 0), xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_center, text='\n\n\n' + prcVarLowText, textcolor=colorPctDn, color=color.rgb(0,0,0,100))
 
 
 
@@ -496,139 +561,237 @@ if(i_displayHL and not tfWeekly)
 
 
 // INPUTS
-i_displayPattern         = input(true, title='Display Pattern'                , group='Chart Pattern Recognition')
-i_displayBoxes           = input(true, title='Display Trade Boxes'            , group='Chart Pattern Recognition')
-i_displayHistoricalBoxes = input(false, title='Display Historical Trade Boxes' , group='Chart Pattern Recognition')
+i_displayPattern         = input(true,  title='Display Pattern',                group='Chart Pattern Recognition')
+i_displayBoxes           = input(true,  title='Display Trade Boxes',            group='Chart Pattern Recognition')
+i_displayHistoricalBoxes = input(false, title='Display Historical Trade Boxes', group='Chart Pattern Recognition')
+i_baseDepth              = input(50,    title='Base: Depth (%)',                group='Chart Pattern Recognition', inline='Parameters Base')
+i_baseLength             = input(65,    title='Length (Weeks)',                 group='Chart Pattern Recognition', inline='Parameters Base')
+i_dbDepth                = input(50,    title='Double Bottom: Depth (%)',       group='Chart Pattern Recognition', inline='Parameters DB')
+i_dbLength               = input(65,    title='Length (Weeks)',                 group='Chart Pattern Recognition', inline='Parameters DB')
+
+// FUTURE PART TO HANDLE WE TF
+i_baseDepth  := i_baseDepth  /100
+i_dbDepth    := i_dbDepth    /100
+// if (timeframe.isdaily)
+i_baseLength := i_baseLength *5
+i_dbLength   := i_dbLength   *5
+// if (timeframe.isweekly)
+    // i_pivot := 2
+
 
 // ARRAYS
 // PIVOTS
-var pivotHighValuesC = array.new_float(0)
-var pivotLowValuesC  = array.new_float(0)
+var pivotHighPrices      = array.new_float(0)
+var pivotLowPrices       = array.new_float(0)
 // BASE PATTERN
 // Prices
-var baseBeginingY       = array.new_float(0)
-var lowOfBase           = array.new_float(0)
-var pivotHighValuesLow  = array.new_float(0) // For Double Bottom
+var startBasePrice       = array.new_float(0)
+var lowBasePrice         = array.new_float(0)
+var lowOfpivotHighPrices = array.new_float(0)
+var float lowOfBaseHigh  = 0
 // Bars
-var int baseBeginingX   = 0
-var pivotHighBar        = array.new_int(0)
-var pivotLowBar         = array.new_int(0)
+var int startBaseBar     = 0
+var int lowerBaseBar     = 0
+var pivotHighBars        = array.new_int(0)
+var pivotLowBars         = array.new_int(0)
 // DOUBLE BOTTOM PATTERN
 // Prices
-var highOfDoubleBottom  = array.new_float(0)
-var lowOfDoubleBottom   = array.new_float(0)
+var topDBPrice           = array.new_float(0)
+var bottomDBPrice        = array.new_float(0)
 // Bars
-var int DBBeginingX     = 0
-var int DBBottomX       = 0
+var int topDBBar         = 0
+var int bottomDBBar      = 0
+// CUP PATTERN
+var baseCloses           = array.new_float(0)
 
 
 // PIVOTS HIGH/LOW
-// Use the function ta.pivothigh/low() and store values in arrays
+// Use the function ta.pivothigh/low()
 pivotHigh = ta.pivothigh(high, i_pivot, i_pivot)
 pivotLow  = ta.pivotlow (low,  i_pivot, i_pivot)
+// When it occurs, store key points values in arrays
 if (pivotHigh)
-    array.unshift(pivotHighValuesC, high[i_pivot])
-    array.unshift(pivotHighValuesLow, low[i_pivot])
-    array.unshift(pivotHighBar, bar_index[i_pivot])
+    array.unshift(pivotHighPrices, high[i_pivot])
+    array.unshift(lowOfpivotHighPrices, low[i_pivot])
+    array.unshift(pivotHighBars, bar_index[i_pivot])
 if (pivotLow)
-    array.unshift(pivotLowValuesC, low[i_pivot])
-    array.unshift(pivotLowBar, bar_index[i_pivot])
+    array.unshift(pivotLowPrices, low[i_pivot])
+    array.unshift(pivotLowBars, bar_index[i_pivot])
 
 
-// Calculation for the detection of the base
+// Calculation for the conditions of base detection (out of scope)
 boolHighbase   = false
 boolHigherPiv  = false
 highestOfBase  = ta.highest(high, 25 )
-highestOfHist  = ta.highest(high, 50 )
+highestOfComp  = ta.highest(high, 50 )
 lowestBaseLow  = ta.lowest (low , 25 )
 lowestPointLeg = ta.lowest (low , 103)
 var baseCond   = false
 isBase         = false
 
 
-// CONDITIONS FOR BASE DETECTION
-if(array.size(pivotHighValuesC) > 2)
+// CONDITIONS FOR BASE DETECTION (Consolidation: (6 to 65 weeks)(8% to 50%)  Flat Base: (5 to 65 week) (0% with a maximum of 15%)
+if(array.size(pivotHighPrices) > 2)
     // In case the base is made of multiple Pivots High without Pivot Low
-    boolHighbase  := high[25]==array.get(pivotHighValuesC, 0) or  high[25]==array.get(pivotHighValuesC, 1) or high[25]==array.get(pivotHighValuesC, 2)
-    boolHigherPiv := high[25]>=highestOfHist
+    boolHighbase  := high[25]==array.get(pivotHighPrices, 0) or  high[25]==array.get(pivotHighPrices, 1) or high[25]==array.get(pivotHighPrices, 2)
+    boolHigherPiv := high[25]>=highestOfComp
     // Minimal Leg Up Calculation
-    legUp          = lowestPointLeg * (15+100)/100
+    legUp          = lowestPointLeg * 1.20  // 20%
     legUpCond      = high[25] >= legUp
     // Maximal Base Depth
-    firstBaseDepth = high[25] * (100-35)/100 <= lowestBaseLow
+    firstBaseDepth = high[25] * (1-i_baseDepth)  <= lowestBaseLow
     // No candle is above high[25]
     noCandleAbove  = highestOfBase <= high[25]
     // The candle of the begining of the base isn't in a previous base
     noBaseInBase   = isBase[25] == false
     // Every Conditions with spikes for detection
     baseCond := boolHighbase and boolHigherPiv and legUpCond and firstBaseDepth and noCandleAbove and noBaseInBase
-
 // If Base Detected we store key points
+lowestBar = ta.barssince(low==lowestBaseLow)
 if (baseCond and not isBase[1])
-    array.unshift(baseBeginingY, high[25])
-    baseBeginingX := bar_index[25]
-    array.unshift(lowOfBase    , lowestBaseLow)
+    array.unshift(startBasePrice, high[25])
+    startBaseBar := bar_index[25]
+    array.unshift(lowOfpivotHighPrices, low[25])
+    lowOfBaseHigh := low[25]
+    array.unshift(lowBasePrice    , lowestBaseLow)
+    lowerBaseBar := bar_index[lowestBar] // Needs to be incremented and reset when base is over
+    // Get every close of the Base for Cup Detection
+    for i = 0 to 25
+        array.unshift(baseCloses, close[i])
 
-// Bool for Actual base that stay at 1 while the base is still valid
+
+// Bool for base that is true while the base is still valid
 if (baseCond or isBase[1])
     isBase := true
 
-
 // Candle Base Counter
-var int baseCount    = na
+var int baseCount    = 0
 // When a base is detected, reset the bar count
 if (baseCond and not isBase[1])
-    baseCount := bar_index-baseBeginingX
+    baseCount := bar_index-startBaseBar
 // Increment the bar count if we are in a base
 if (isBase)
-    baseCount := baseCount + 1
+    baseCount     := baseCount + 1
 
-
-// Boolean for Box Gestion
+// Boolean for Trades Box Gestion
 isBox   = false
 boxOver = true
 if(isBox[1] and not boxOver[1])
     isBox := true
-
-// CONDITIONS FOR DOUBLE BOTTOM DETECTION
+ 
+// CONDITIONS FOR DOUBLE BOTTOM DETECTION (10% to 50%) (7 to 65 weeks)
 detectDoubleBottom = false
 if(isBase)
-    if (array.size(pivotHighValuesC) > 1 and array.size(pivotLowValuesC) > 1)
-        firstPivHigh = array.get(pivotHighValuesC, 1)
-        scndPivHigh  = array.get(pivotHighValuesC, 0)
-        firstPivLow  = array.get(pivotLowValuesC, 1)
-        scndPivLow   = array.get(pivotLowValuesC, 0)
+    if (array.size(pivotHighPrices) > 1 and array.size(pivotLowPrices) > 1)
+        firstPivHigh = array.get(pivotHighPrices, 1)
+        scndPivHigh  = array.get(pivotHighPrices, 0)
+        firstPivLow  = array.get(pivotLowPrices, 1)
+        scndPivLow   = array.get(pivotLowPrices, 0)
         // Price Conditions
-        condPricesA  = firstPivHigh > scndPivHigh and firstPivLow > scndPivLow and firstPivLow < scndPivHigh
-        condPricesB  = scndPivLow >= 0.6 * firstPivHigh
-        condPricesC  = scndPivLow <= 0.9 * firstPivHigh
-        condPricesD  = (firstPivHigh-scndPivLow) * 0.6 + scndPivLow <= scndPivHigh // Buy point is above 60% of the base
-        condPricesE  = (firstPivHigh-scndPivLow) * 0.9 + scndPivLow >= scndPivHigh // Buy point is at least under 10% of the high of the base
-        condPricesF  = (firstPivHigh-firstPivLow)/(scndPivHigh-scndPivLow) >= 0.75
+        condPricesA  = firstPivHigh > scndPivHigh and firstPivLow*0.97 > scndPivLow and firstPivLow < scndPivHigh
+        condPricesB  = scndPivLow >= (1-i_dbDepth) * firstPivHigh                        // Depth Condition
+        condPricesC  = scndPivLow <= 0.9       * firstPivHigh
+        condPricesD  = (firstPivHigh-scndPivLow) * 0.6  + scndPivLow <= scndPivHigh   // Buy point is above 60% of the base
+        condPricesE  = (firstPivHigh-scndPivLow) * 0.95 + scndPivLow >= scndPivHigh // Buy point is at least under 10% of the high of the base
+        condPricesF  = (firstPivHigh-firstPivLow)/(scndPivHigh-scndPivLow) >= 0.70
+        condPricesG  = (firstPivHigh-firstPivLow)/2 + firstPivLow <= scndPivHigh // The first up leg of the first V must retrace at least 50% of the first down leg
+        condPricesH  = true
+        if (array.size(startBasePrice) > 0)
+            condPricesH  := firstPivHigh == array.get(startBasePrice, 0)
         // Assigned in order of Time
-        firstPivTime = array.get(pivotHighBar, 1)
-        scndPivTime  = array.get(pivotLowBar, 1)
-        thrdPivTime  = array.get(pivotHighBar, 0)
-        frthPivTime  = array.get(pivotLowBar, 0)
+        firstPivTime = array.get(pivotHighBars, 1)
+        scndPivTime  = array.get(pivotLowBars, 1)
+        thrdPivTime  = array.get(pivotHighBars, 0)
+        frthPivTime  = array.get(pivotLowBars, 0)
         // Time Conditions
         condTimeA    = firstPivTime < scndPivTime and scndPivTime < thrdPivTime and thrdPivTime < frthPivTime
         condTimeB    = frthPivTime - firstPivTime <= 100
         condTimeC    = (thrdPivTime-firstPivTime) * 2 >= (bar_index-thrdPivTime) // Pattern Propreties A-C x 2 > E-D
         condTimeD    = (thrdPivTime-firstPivTime) <= (bar_index-thrdPivTime) * 2 // Same as above but for the other side
+        // Here we use bars between the two first legs. For the 2 last legs it will be done later as the pattern is being created
+        condTimeE    = scndPivTime-firstPivTime <= 2 * (thrdPivTime-scndPivTime) and thrdPivTime-scndPivTime <= (scndPivTime-firstPivTime) * 2
+        condTimeF    = frthPivTime-thrdPivTime <= 2 * (thrdPivTime-scndPivTime)  and frthPivTime-thrdPivTime >= 0.5 * (thrdPivTime-scndPivTime) // Third leg must match size against second leg
         // Time and Price Conditions
         condBothA    = ta.highest(high, bar_index-frthPivTime) <= scndPivHigh
-        // Here we use bars between the two first legs. For the 2 last legs it will be done later as the pattern is being created
-        condTimeE    = scndPivTime-firstPivTime <= 2 * (thrdPivTime-scndPivTime) and thrdPivTime-scndPivTime <= (scndPivTime-firstPivTime) *2
-        if (condPricesA and condPricesB and condPricesC and condPricesD and condPricesE and condPricesF and condTimeA and condTimeB and condTimeC and condTimeD and condTimeE and condBothA)
+        // All Conditions
+        if (condPricesA and condPricesB and condPricesC and condPricesD and condPricesE and condPricesF and condPricesG and condPricesH and condTimeA and condTimeB and condTimeC and condTimeD and condTimeE and condTimeF and condBothA)
             detectDoubleBottom := true
-            array.unshift(lowOfDoubleBottom, scndPivLow)
-            array.unshift(highOfDoubleBottom, firstPivHigh)
-            DBBeginingX := array.get(pivotHighBar, 1)
+            array.unshift(bottomDBPrice, scndPivLow)
+            array.unshift(topDBPrice, firstPivHigh)
+            topDBBar := array.get(pivotHighBars, 1)
 
-// Boolean to store the information
+// Boolean to store the information of a current Double Bottom
 isDoubleBottom = false
 if (detectDoubleBottom or isDoubleBottom[1])
     isDoubleBottom := true
+
+// For every bar in the base we store the closes in an array in order to compare
+if (isBase)
+    array.unshift(baseCloses, close)
+
+// CONDITIONS FOR CUP DETECTION (6 to 65 weeks) (8% to 50% depth)
+detectCup = false
+isCup     = false
+// Depth
+float highCup = 0
+float lowCup  = 0
+//Condition Cup
+condThird         = false
+condFourth        = false
+condThirdTwo      = false
+condFourthTwo     = false
+// condPartThree     = false
+// Reference points
+float middleOfCup = 0
+baseTier          = baseCount/3
+baseFourth        = baseCount/4
+numberOfValidCl1  = 0
+numberOfValidCl2  = 0
+if (isBase)
+    if (array.size(startBasePrice) > 0 and array.size(lowBasePrice) > 0)
+        highCup     := array.get(startBasePrice, 0)
+        lowCup      := array.get(lowBasePrice, 0)
+    middleOfCup := lowCup + (highCup-lowCup)*0.5
+    // Depth
+    condMaxDepth = lowCup >= (1-i_baseDepth) * highCup
+    condMinDepth = lowCup <= 0.92        * highCup
+    // Length
+    condMaxLength    = bar_index-startBaseBar <= i_baseLength
+    condMinLength    = bar_index-startBaseBar >= 30
+    // Asolute Position against the Cup (50%)
+    condAbsolutePos  = (highCup-lowCup)*0.5 + lowCup <= high
+    // Technical (80% of closes above 40% of base in the first tier, 80% under in the second.)
+    for i= baseCount to 2*baseTier
+        if (close[i]>=middleOfCup)
+            numberOfValidCl1 := numberOfValidCl1+1
+    condThirdTwo := numberOfValidCl1/baseTier >= 0.3
+    for i = baseCount-baseTier to baseTier
+        if (close[i]<=middleOfCup)
+            numberOfValidCl2 := numberOfValidCl2+1
+    condThird := numberOfValidCl2/baseTier >= 0.90 // 85% of closes must be contained in the middle thrid of the cup
+    // Technical 2 (Same with 2*Fourth (half))
+    numberOfValidCl1  := 0
+    numberOfValidCl2  := 0
+    for i= baseCount to 3*baseFourth
+        if (close[i]>=middleOfCup)
+            numberOfValidCl1 := numberOfValidCl1+1
+    condThirdTwo := numberOfValidCl1/baseFourth >= 0.3
+    for i = baseCount-baseFourth to baseFourth
+        if (close[i]<=middleOfCup)
+            numberOfValidCl2 := numberOfValidCl2+1
+    condFourth := numberOfValidCl2/(2*baseFourth) >= 0.90  // or 85% of the closes must be contained in the middle half of the cup
+    cupForm     = (condThird and condThird[1] and condThirdTwo and condThirdTwo[1]) or (condFourth and condFourth[1] and condFourthTwo and condFourthTwo[1])
+    detectCup  := condMaxDepth and condMinDepth and condMaxLength and condMinLength and condAbsolutePos and cupForm
+
+
+// Boolean to store the information
+if (detectCup or isCup[1])
+    isCup := true
+
+// CUP MAINTENANCE
+// plot (condThirdTwo ? 15:13, color=color.red)
+// plot (condFourthTwo ? 12:9,  color=color.orange)
+// plot (detectCup   ? 25:20, color=color.lime)
 
 // Graphical Objects Declaration
 // Horizontal Lines
@@ -637,6 +800,10 @@ var line lowLine  = na
 var line dbLine1  = na
 var line dbLine2  = na
 var line dbLine3  = na
+var line cupLineLeft      = na
+var line cupLineRight     = na
+var line cupLineLeftLive   = na
+var line cupLineRightLive = na
 
 // Box for Entry/Take Profit/ SL
 var box entryBox = na
@@ -646,8 +813,8 @@ var box tpBox    = na
 
 // DRAWING BASE ON CHART IF DETECTION
 if (baseCond and not isBase[1] and timeframe.isdaily and i_displayPattern)
-    highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-    lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase    , 0), x2=bar_index, y2=array.get(lowOfBase   , 0),  width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
+    highLine := line.new(x1=startBaseBar, y1=array.get(startBasePrice, 0), x2=bar_index, y2=array.get(startBasePrice, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
+    lowLine  := line.new(x1=startBaseBar, y1=array.get(lowBasePrice, 0),   x2=bar_index, y2=array.get(lowBasePrice, 0),   width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
     select = i_displayHistoricalBoxes ? false:boxOver
     // Optional Trade Boxes
     if(select)
@@ -656,26 +823,97 @@ if (baseCond and not isBase[1] and timeframe.isdaily and i_displayPattern)
         box.delete(tpBox)
         isBox   := false
         boxOver := true
+
+// // // DRAWING CURRENT CUP IF DETECTED
+var line[] linesLeft  = array.new_line(na)
+var line[] linesRight = array.new_line(na)
+// Exception with ta.lowest() series not equal to lower low (eg IOT)
+if (lowerBaseBar-startBaseBar <= 0)
+    lowValue = low
+    for i=baseCount to 0
+        if(low[i]<lowValue)
+            lowerBaseBar := bar_index[i]
+            lowValue     := low[i]
+lengthLeft   = lowerBaseBar-startBaseBar
+lengthRight  = bar_index-lowerBaseBar
+if (detectCup and isBase and timeframe.isdaily and i_displayPattern and not isDoubleBottom[1] and barstate.islast)
+    // Draw Current Cup
+    if (array.size(linesRight) > (lengthRight-1))
+        for i = 0 to (lengthRight-1)
+            line.delete(array.get(linesRight, i))
+    line.delete(lowLine)
+    var int   x1 = 0
+    var float y1 = na
+    var int   x2 = 0
+    var float y2 = na
+    // Some Reference Points
+    var float startUpPrice = 0
+    var float bottomPrice  = 0
+    // Drawing Informations
+    isLeftDrawn = false
+    // Out of scope calculation
+    if(array.size(lowBasePrice) > 0)   // array.size(lowOfpivotHighPrices) > 0 and 
+        startUpPrice := lowOfBaseHigh * (1-0.01)
+        bottomPrice  := array.get(lowBasePrice, 0) * (1-0.01)
+    endUpPrice   = low[1]*(1-0.01)
+    // We want a curve with an exp(x) form
+    if(timeframe.isdaily and i_displayPattern and array.size(lowBasePrice) > 0 and startUpPrice>bottomPrice) // and array.size(lowOfpivotHighPrices) > 0
+        // First Part
+        for i = 0 to (lengthLeft-1)
+            float k = 1/math.exp(0)/(startUpPrice-bottomPrice)
+            x1 := bar_index[(lengthLeft-1)-(i-1)]
+            x2 := bar_index[(lengthLeft-1)-(i  )]
+            y1 := bottomPrice + (1/math.exp(i    *6/lengthLeft))/k
+            y2 := bottomPrice + (1/math.exp((i+1)*6/lengthLeft))/k
+            // Remove spread at the bottom of the cup
+            if (i==lengthLeft-1)
+                y2 := bottomPrice
+            // Magical Drawing Left Part
+            cupLineLeftLive := line.new(x1=x1-lengthRight, y1=y1, x2=x2-lengthRight, y2=y2, color=color.rgb(146,193,131,0), width=3)
+            array.unshift(linesLeft, cupLineLeftLive)
+            isLeftDrawn := true
+        // Second Part
+        if (isLeftDrawn)
+            for i = 0 to (lengthRight-1) // 1 to 6 is the sample from e^1 to e^6 for the part of the curve I've selected
+                float k = math.exp(6)/(endUpPrice-bottomPrice)
+                x1 := bar_index[(lengthRight-1)-(i-1)]
+                x2 := bar_index[(lengthRight-1)-i    ]
+                y1 := bottomPrice + (math.exp(i    *6/lengthRight)-1)/k
+                // Remove spread at the bottom of the cup
+                if(i==0)
+                    y1 := bottomPrice
+                y2 := bottomPrice + (math.exp((i+1)*6/lengthRight)-1)/k
+                // Magical Drawing Right Part
+                cupLineRightLive := line.new(x1=x1, y1=y1, x2=x2, y2=y2, color=color.rgb(146,193,131,0), width=3)
+                array.unshift(linesRight, cupLineRightLive)   
+// Deletes Current cup if not a cup anymore
+// if (not isCup and array.size(linesLeft) > (lengthLeft-1))
+//     for i = 0 to (lengthLeft-1)
+//         line.delete(array.get(linesLeft, i))
+
+// if (not isCup and array.size(linesRight) > (lengthRight-1))
+//     for i = 0 to (lengthRight-1)
+//         line.delete(array.get(linesRight, i))
 
 
 // DRAWING DOUBLE BOTTOM ON CHART IF DETECTION
-lowCompare = baseCount > 0 ? ta.lowest(low, baseCount):low
+lowCompare = bar_index-topDBBar > 0 ? ta.lowest(low, bar_index-topDBBar):low
 if (detectDoubleBottom and not isDoubleBottom[1]  and timeframe.isdaily and i_displayPattern)
     line.delete(highLine)
     line.delete(lowLine )
-    DBBottomX := array.get(pivotLowBar,  0)
-    // If Lower Low But Double Bottom Still valid
-    if (array.size(lowOfDoubleBottom) > 0)
-        if (lowCompare < array.get(lowOfDoubleBottom, 0))
-            array.unshift(lowOfDoubleBottom, lowCompare)
-            DBBottomX := bar_index - ta.barssince(low==lowCompare)
-            if (low[1] == array.get(lowOfDoubleBottom, 0))
-                DBBottomX := bar_index[1]
-    highLine := line.new(x1=array.get(pivotHighBar, 0), y1=array.get(pivotHighValuesC, 0), x2=bar_index, y2=array.get(pivotHighValuesC, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-    dbLine1 := line.new(x1=array.get(pivotHighBar, 1), y1=array.get(pivotHighValuesLow, 1)*(100-1)/100 , x2=array.get(pivotLowBar,  1), y2=array.get(pivotLowValuesC,  1)*(100-1)/100    , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
-    dbLine2 := line.new(x1=array.get(pivotLowBar,  1), y1=array.get(pivotLowValuesC,     1)*(100-1)/100, x2=array.get(pivotHighBar, 0), y2=array.get(pivotHighValuesLow, 0)*(100-1)/100  , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
-    dbLine3 := line.new(x1=array.get(pivotHighBar, 0), y1=array.get(pivotHighValuesLow, 0)*(100-1)/100 , x2=DBBottomX                 , y2=array.get(lowOfDoubleBottom,  0)*(100-1)/100  , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
-    lowLine := line.new(x1=DBBottomX                 , y1=array.get(lowOfDoubleBottom,  0)*(100-1)/100 , x2=bar_index                 , y2=low * (100-1)/100                             , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    bottomDBBar := array.get(pivotLowBars,  0)
+    // If Lower Low But Double Bottom Still valid (CASY)
+    //if (array.size(bottomDBPrice) > 0)   // This part is generating Error on SPX ticker due to too much candle on study
+        // if (lowCompare < array.get(bottomDBPrice, 0))
+        //     array.unshift(bottomDBPrice, lowCompare)
+            // bottomDBBar := bar_index - ta.barssince(low==lowCompare)
+            // if (low[1] == array.get(bottomDBPrice, 0))
+            //     bottomDBBar := bar_index[1]
+    highLine := line.new(x1=array.get(pivotHighBars, 0), y1=array.get(pivotHighPrices, 0), x2=bar_index, y2=array.get(pivotHighPrices, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
+    dbLine1 := line.new(x1=array.get(pivotHighBars, 1), y1=array.get(lowOfpivotHighPrices, 1)*(100-1)/100 , x2=array.get(pivotLowBars,  1), y2=array.get(pivotLowPrices,  1)*(100-1)/100    , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    dbLine2 := line.new(x1=array.get(pivotLowBars,  1), y1=array.get(pivotLowPrices,     1)*(100-1)/100, x2=array.get(pivotHighBars, 0), y2=array.get(lowOfpivotHighPrices, 0)*(100-1)/100  , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    dbLine3 := line.new(x1=array.get(pivotHighBars, 0), y1=array.get(lowOfpivotHighPrices, 0)*(100-1)/100 , x2=bottomDBBar                 , y2=array.get(bottomDBPrice,  0)*(100-1)/100  , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
+    lowLine := line.new(x1=bottomDBBar                 , y1=array.get(bottomDBPrice,  0)*(100-1)/100 , x2=bar_index                 , y2=low * (100-1)/100                             , width=2, style = line.style_solid, color=color.rgb(146,193,131,0))
     select = i_displayHistoricalBoxes ? false:boxOver
     // Optional Trade Boxes
     if(select)
@@ -685,23 +923,11 @@ if (detectDoubleBottom and not isDoubleBottom[1]  and timeframe.isdaily and i_di
         isBox   := false
         boxOver := true
 
-// Check Top Break
-if (high>line.get_y1(highLine) and (isBase[1] or isDoubleBottom[1]))
-    isBase := false  
-    if (isDoubleBottom)
-        isDoubleBottom := false
-    if(i_displayBoxes)
-        topBase   = line.get_y1(highLine)
-        entryBox := box.new(bar_index[1], topBase*(1+0.05), bar_index, topBase         , border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(0,0,255,92))
-        slBox    := box.new(bar_index[1], topBase*(1-0.05), bar_index, topBase*(1-0.08), border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(255, 0, 0, 92))
-        tpBox    := box.new(bar_index[1], topBase*(1+0.20), bar_index, topBase*(1+0.25), border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(66, 226, 18, 92))
-        isBox    := true
-        boxOver  := false
 
 // Check Bottom Break
 // Adjust Double Bottom Base
-if (array.size(lowOfDoubleBottom) > 0)
-    if (low < array.get(lowOfDoubleBottom, 0) and isDoubleBottom)
+if (array.size(bottomDBPrice) > 0)
+    if (low < array.get(bottomDBPrice, 0) and isDoubleBottom)
         line.delete(highLine)
         line.delete(lowLine )
         line.delete(dbLine1 )
@@ -709,10 +935,10 @@ if (array.size(lowOfDoubleBottom) > 0)
         line.delete(dbLine3 )
         isDoubleBottom := false
         // Redraw Original base if Double Bottom disabled
-        highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-        lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase,     0), x2=bar_index, y2=array.get(lowOfBase,     0), width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
+        highLine := line.new(x1=startBaseBar, y1=array.get(startBasePrice, 0), x2=bar_index, y2=array.get(startBasePrice, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
+        lowLine  := line.new(x1=startBaseBar, y1=array.get(lowBasePrice,0),    x2=bar_index, y2=array.get(lowBasePrice, 0),   width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
 // Check Double Bottom base Length
-if (isDoubleBottom and bar_index-DBBeginingX>100)
+if (isDoubleBottom and bar_index-topDBBar>i_dbLength)
     line.delete(highLine)
     line.delete(lowLine )
     line.delete(dbLine1 )
@@ -730,28 +956,104 @@ if (isDoubleBottom and (thrdPivTime-firstPivTime) * 2 <= bar_index-thrdPivTime o
     line.delete(dbLine3 )
     isDoubleBottom := false
     // Redraw Original base if Double Bottom disabled
-    highLine := line.new(x1=baseBeginingX, y1=array.get(baseBeginingY, 0), x2=bar_index, y2=array.get(baseBeginingY, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
-    lowLine  := line.new(x1=baseBeginingX, y1=array.get(lowOfBase,     0), x2=bar_index, y2=array.get(lowOfBase,     0), width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
+    highLine := line.new(x1=startBaseBar, y1=array.get(startBasePrice, 0), x2=bar_index, y2=array.get(startBasePrice, 0), width=3, style = line.style_dotted, color=color.rgb(146,193,131,0))
+    lowLine  := line.new(x1=startBaseBar, y1=array.get(lowBasePrice,0),    x2=bar_index, y2=array.get(lowBasePrice,0),    width=2, style = line.style_solid,  color=color.rgb(146,193,131,0))
 
-// Adjust Bottom of Base
+
+// Adjust Base Bottom
 if (low < line.get_y1(lowLine) and isBase and not isDoubleBottom)
     line.set_y1(lowLine, low)
     line.set_y2(lowLine, low)
-// Check Max Depth and Max Length
-if ((low < line.get_y1(highLine) * (100-40)/100 or baseCount>150) and isBase[1] and not isDoubleBottom[1])
+    lowerBaseBar := bar_index
+    if (array.size(lowBasePrice) > 0)
+        array.unshift(lowBasePrice, low)
+// Check Base Max Depth and Max Length
+if ((low < line.get_y1(highLine) * (1-i_baseDepth) or baseCount>i_baseLength) and isBase[1] and not isDoubleBottom[1])
     line.delete(highLine)
     line.delete(lowLine)
-    isBase    := false
-// Check Depth of base to adjust style of line (Depth above 15% = Dotted Line, defined as flat base by IBD)
+    isBase       := false
+// Check Depth of base to adjust style of line (Depth above 15% = Dashed Line, defined as flat base by IBD)
 if (line.get_y1(highLine) * 0.85 >= line.get_y1(lowLine) and isBase and not isDoubleBottom)
     line.set_style(lowLine, line.style_dotted)
     line.set_width(lowLine, 3)
 // While the base is still valid, we extend lines
 if (high<=line.get_y1(highLine) and low>=line.get_y1(lowLine) and isBase)
     line.set_x2(highLine, bar_index)
+    line.set_x2(lowLine , bar_index)
     if (isDoubleBottom)
         line.set_y2(lowLine, low*(100-1)/100)
-    line.set_x2(lowLine,  bar_index)
+        line.set_x2(lowLine,  bar_index)
+
+
+
+// Check Top Break
+if (high>line.get_y1(highLine) and (isBase[1] or isDoubleBottom[1]))
+    isBase := false  
+    if (isDoubleBottom)
+        isDoubleBottom := false
+    // Drawing historical cups if they are cups during the break out
+    if (detectCup and timeframe.isdaily and i_displayPattern and not isDoubleBottom[1])
+        // Draw historical fix Cups
+        line.delete(lowLine)
+        var int   x1 = 0
+        var float y1 = na
+        var int   x2 = 0
+        var float y2 = na
+        // Some reference points
+        var float startUpPrice = 0
+        var float bottomPrice  = 0
+        // Drawing Informations
+        isLeftDrawn = false
+        // Out of scope calculation
+        if(array.size(lowBasePrice) > 0)   // array.size(lowOfpivotHighPrices) > 0 and 
+            startUpPrice := lowOfBaseHigh * (1-0.01)
+            bottomPrice  := array.get(lowBasePrice, 0) * (1-0.01)
+        endUpPrice   = low[1]*(1-0.01)
+        // Exception with ta.lowest() series not equal to lower low (eg IOT)
+        if (lowerBaseBar-startBaseBar <= 0)
+            lowValue = low
+            for i=baseCount-1 to 0
+                if(low[i]<lowValue)
+                    lowerBaseBar := bar_index[i]
+                    lowValue     := low[i]
+        lengthLeft  := lowerBaseBar-startBaseBar // := au lieu de =
+        lengthRight := bar_index-lowerBaseBar
+        // We want a curve with an exp(x) form
+        if(timeframe.isdaily and i_displayPattern and array.size(lowBasePrice) > 0 and startUpPrice>bottomPrice) // and array.size(lowOfpivotHighPrices) > 0
+            // First Part
+            for i = 0 to (lengthLeft-1)
+                float k = 1/math.exp(0)/(startUpPrice-bottomPrice)
+                x1 := bar_index[(lengthLeft-1)-(i-1)]
+                x2 := bar_index[(lengthLeft-1)-(i  )]
+                y1 := bottomPrice + (1/math.exp(i    *6/lengthLeft))/k
+                y2 := bottomPrice + (1/math.exp((i+1)*6/lengthLeft))/k
+                // Remove spread at the bottom of the cup
+                if (i==lengthLeft-1)
+                    y2 := bottomPrice
+                // Magical Drawing Left Part
+                cupLineLeft := line.new(x1=x1-lengthRight, y1=y1, x2=x2-lengthRight, y2=y2, color=color.rgb(146,193,131,0), width=3)
+                isLeftDrawn := true
+            // Second Part
+            if (isLeftDrawn)
+                for i = 0 to (lengthRight-1) // 1 to 6 is the sample from e^1 to e^6 for the part of the curve I've selected
+                    float k = math.exp(6)/(endUpPrice-bottomPrice)
+                    x1 := bar_index[(lengthRight-1)-(i-1)]
+                    x2 := bar_index[(lengthRight-1)-i    ]
+                    y1 := bottomPrice + (math.exp(i    *6/lengthRight)-1)/k
+                    // Remove spread at the bottom of the cup
+                    if(i==0)
+                        y1 := bottomPrice
+                    y2 := bottomPrice + (math.exp((i+1)*6/lengthRight)-1)/k
+                    // Magical Drawing Right Part
+                    cupLineRight := line.new(x1=x1, y1=y1, x2=x2, y2=y2, color=color.rgb(146,193,131,0), width=3)
+        // END CUP DRAWING
+    if(i_displayBoxes)
+        topBase   = line.get_y1(highLine)
+        entryBox := box.new(bar_index[1], topBase*(1+0.05), bar_index, topBase         , border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(0,0,255,92))
+        slBox    := box.new(bar_index[1], topBase*(1-0.05), bar_index, topBase*(1-0.08), border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(255, 0, 0, 92))
+        tpBox    := box.new(bar_index[1], topBase*(1+0.20), bar_index, topBase*(1+0.25), border_color=color.rgb(0,0,0,100), border_width=0, bgcolor=color.rgb(60, 243, 4, 88))
+        isBox    := true
+        boxOver  := false
     
 
 // TRADE BOX GESTION
@@ -762,3 +1064,9 @@ if (high<=line.get_y1(highLine)*(1+0.25) and low>=line.get_y1(highLine)*(1-0.08)
     box.set_right(tpBox   , bar_index)
     isBox   := true
     boxOver := false
+
+// MEMORY LIMIT GESTION (ARRAY SIZE)
+if (array.size(linesLeft)  > 500)
+    line.delete(array.pop(linesLeft))
+if (array.size(linesRight) > 500)
+    line.delete(array.pop(linesRight))
