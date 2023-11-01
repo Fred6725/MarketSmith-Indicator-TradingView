@@ -15,16 +15,24 @@ colChg  = input(color.rgb(39,54,233,0), title='', group = 'LABELS', inline='1')
 percChg = input(true, title='%Change on Labels',  group='LABELS')
 labelS  = input.string('Normal', 'Text Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'LABELS')
 peakL   = input(9, 'Peak Length', group='LABELS')
-lenDa   = input(50, 'Length Daily', group = 'MA')
-lenWe   = input(10, 'Length Weekly', group = 'MA')
+lenDa   = input(50, 'Length Daily', group = 'MA', inline = '1')
+lenWe   = input(10, 'Weekly', group = 'MA', inline = '1')
 colMa   = input(color.red, title='MA Color', group = 'MA')
 showLab = input(true, title='Label on Last Volume Bar', group = 'CURRENT BAR LABEL')
 sizeLab = input.string('Normal', 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'CURRENT BAR LABEL')
-curDol  = input(false, title='Average $ Volume', group = 'CURRENT BAR LABEL')
+//curDol  = input(false, title='Average $ Volume', group = 'CURRENT BAR LABEL')
 labCol  = input(color.rgb(59,60,66,0), title = 'Label Color', group = 'CURRENT BAR LABEL')
 volCol  = input(color.white, title = 'Volume Color', group = 'CURRENT BAR LABEL')
 posCol  = input(color.lime, title='Positive Buzz Color', group = 'CURRENT BAR LABEL')
 negCol  = input(color.red, title='Negative Buzz Color', group = 'CURRENT BAR LABEL')
+showTa  = input(true, title='Show Table', group = 'Table')
+sizeTa  = input.string('Small', 'Table Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'Table')
+volTa   = input(false, title = 'Current Volume on Table', group = 'Table')
+buzzTa  = input(false, title = 'Vol. Buzz on Table', group = 'Table')
+TabCol  = input(color.rgb(59,60,66,0), title = 'Label Color', group = 'Table')
+txtTCol = input(color.white, title = 'Volume Color', group = 'Table')
+posTCol  = input(color.lime, title='Positive Buzz Color', group = 'Table')
+negTCol  = input(color.red, title='Negative Buzz Color', group = 'Table')
 
 tf      = timeframe.period
 ticker  = syminfo.tickerid
@@ -37,6 +45,12 @@ sLabel = switch labelS
     'Large'   => size.large
 
 sLabel2 = switch sizeLab
+    'Normal'  => size.normal
+    'Tiny'    => size.tiny
+    'Small'   => size.small
+    'Large'   => size.large
+
+taSize = switch sizeTa
     'Normal'  => size.normal
     'Tiny'    => size.tiny
     'Small'   => size.small
@@ -70,6 +84,19 @@ if(volFormat >= 1000000 and volFormat < 1000000000)
 if(volFormat >= 1000000000)
     volFormat := math.round(volFormat/1000000000, 2)
     uV       := 'B'
+
+// Average Volume
+advVol = math.round(ma, 0)
+uVAvg = ''
+if(advVol >= 1000 and advVol < 1000000)
+    advVol := math.round(advVol/1000, 2)
+    uVAvg := 'K'
+if(advVol >= 1000000 and advVol < 1000000000)
+    advVol := math.round(advVol/1000000, 2)
+    uVAvg := 'M'
+if(advVol >= 1000000000)
+    advVol := math.round(advVol/1000000000, 2)
+    uVAvg := 'B'
 
 // Average $ Volume
 advDol = math.round(close*ma, 0)
@@ -146,16 +173,48 @@ txtVol    = str.tostring(volFormat)+uV+'\n'
 txtDolVol = 'N/A'
 txtVar    = volBuzz >= 0 ? '\n+'+str.tostring(math.round(volBuzz))+'%':'\n'+str.tostring(math.round(volBuzz))+'%'
 
-if (curDol)
-    txtVol    := str.tostring(volFormat)+uV+'\n\n'
-    txtDolVol := '\n$'+str.tostring(advDol)+uVDoll+'\n'
-    txtVar    := volBuzz >= 0 ? '\n\n+'+str.tostring(math.round(volBuzz))+'%':'\n\n'+str.tostring(math.round(volBuzz))+'%'
-
 // Label Display
 if barstate.islast and showLab
     currentVol       = label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtVol,    textalign = text.align_left, size=sLabel2, color = labCol, textcolor=volCol)
-    currentDollarVol = curDol ? label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtDolVol, textalign = text.align_left, size=sLabel2, color = color.rgb(0, 0, 0, 100), textcolor=volCol):na
     currentBuz       = label.new(bar_index, trunc?vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_left, text=txtVar,    textalign = text.align_left, size=sLabel2, color = color.rgb(0, 0, 0, 100), textcolor=txtCol)
     label.delete(currentVol[1])
-    label.delete(currentDollarVol[1])
     label.delete(currentBuz[1])
+
+
+// Up/Down Volume Ratio ( Thanks Brandon ;) )
+upVol =         close > close[1] ? volume : 0
+dnVol =         close < close[1] ? volume : 0
+sumUp =         math.sum(upVol, 50)
+sumDn =         math.sum(dnVol, 50)
+upDnVolRatio =  sumUp / sumDn
+
+
+// Table
+// Display Table
+table t = table.new(position.top_right, 2, 5, bgcolor=TabCol)
+if barstate.islast and showTa
+    // Average Volume
+    table.cell(t, 0, 0, "Avg Vol: ", text_color=txtTCol, text_size=taSize)
+    table.cell(t, 1, 0, str.tostring(advVol, '0.00')+uVAvg, text_color =txtTCol, text_size=taSize)
+    table.cell_set_text_halign(t, 0,  0, text_halign = text.align_right)
+    table.cell_set_text_halign(t, 1,  0, text_halign = text.align_right)
+    // Average Dollar Volume
+    table.cell(t, 0, 1, "Avg $ Vol: ", text_color=txtTCol, text_size=taSize)
+    table.cell(t, 1, 1, str.tostring(advDol)+uVDoll, text_color =txtTCol, text_size=taSize)
+    table.cell_set_text_halign(t, 0,  1, text_halign = text.align_right)
+    table.cell_set_text_halign(t, 1,  1, text_halign = text.align_right)
+    // Up/Down Volume
+    table.cell(t, 0, 2, "U/D Vol: ", text_color=txtTCol, text_size=taSize)
+    table.cell(t, 1, 2, str.tostring(upDnVolRatio, '0.0'), text_color =txtTCol, text_size=taSize)
+    table.cell_set_text_halign(t, 0,  2, text_halign = text.align_right)
+    table.cell_set_text_halign(t, 1,  2, text_halign = text.align_right)
+    if volTa
+        table.cell(t, 0, 3, "Vol: ", text_color=txtTCol, text_size=taSize)
+        table.cell(t, 1, 3, str.tostring(volFormat, '0.00')+uV, text_color =txtTCol, text_size=taSize)
+        table.cell_set_text_halign(t, 0,  3, text_halign = text.align_right)
+        table.cell_set_text_halign(t, 1,  3, text_halign = text.align_right)
+    if buzzTa
+        table.cell(t, 0, 4, "Buzz: ", text_color=txtTCol, text_size=taSize)
+        table.cell(t, 1, 4, volBuzz >= 0 ? '+'+str.tostring(math.round(volBuzz))+'%':str.tostring(math.round(volBuzz))+'%', text_color =volBuzz >= 0 ? posTCol:negTCol, text_size=taSize)
+        table.cell_set_text_halign(t, 0,  4, text_halign = text.align_right)
+        table.cell_set_text_halign(t, 1,  4, text_halign = text.align_right)
