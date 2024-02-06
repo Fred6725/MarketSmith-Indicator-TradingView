@@ -5,18 +5,21 @@
 indicator('MarketSmith Volumes', format = format.volume, max_labels_count = 500)
 
 // Inputs
+trunc   = input(false, title='Truncate for MarketSmith type display', group = 'DISPLAY')
+prevC   = input(true, title='Color Based On Previous Close',  group='VOLUMES')
 colUp   = input(color.rgb(39,54,233,0), title='Up Volume Color', group = 'VOLUMES')
 colDn   = input(color.rgb(222,50,174,0), title='Down Volume Color', group = 'VOLUMES')
-prevC   = input(true, title='Color Based On Previous Close',  group='VOLUMES')
-trunc   = input(false, title='Truncate for MarketSmith type display', group = 'DISPLAY')
-labels  = input(true, title='Labels on Volume', group = 'LABELS', inline='1')
-labelC  = input(color.rgb(0,0,0,0), title='Color', group = 'LABELS', inline='1')
-colChg  = input(color.rgb(39,54,233,0), title='', group = 'LABELS', inline='1')
-percChg = input(true, title='%Change on Labels',  group='LABELS')
-labelS  = input.string('Normal', 'Text Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'LABELS')
-peakL   = input(9, 'Peak Length', group='LABELS')
-lenDa   = input(50, 'Length Daily', group = 'MA', inline = '1')
-lenWe   = input(10, 'Weekly', group = 'MA', inline = '1')
+lwVol   = input(false, title='Low Relative Volume', group = 'VOLUMES', inline='1')
+colLw   = input(color.rgb(123, 124, 126), title='', group = 'VOLUMES', inline='1')
+shrsN   = input(true, title='Number Of Shares', group = 'HISTORIC LABELS')
+percChg = input(true, title='Change (%)', group='HISTORIC LABELS')
+hv      = input(true, title='Highest Volumes', group='HISTORIC LABELS')
+peakL   = input(9, 'Peak Length', group='HISTORIC LABELS')
+labelS  = input.string('Normal', 'Text Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'HISTORIC LABELS')
+labelC  = input(color.rgb(0,0,0,0),     title='Hv & Shares Txt Color', group = 'HISTORIC LABELS', inline='1')
+colChg  = input(color.rgb(39,54,233,0), title='Var% Txt Color',   group = 'HISTORIC LABELS', inline='2')
+lenDa   = input(50, 'Length Daily MA', group = 'MA')
+lenWe   = input(10, 'Length Weekly MA', group = 'MA')
 colMa   = input(color.red, title='MA Color', group = 'MA')
 showLab = input(true, title='Label on Last Volume Bar', group = 'CURRENT BAR LABEL')
 sizeLab = input.string('Normal', 'Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'CURRENT BAR LABEL')
@@ -29,13 +32,16 @@ showTa  = input(true, title='Show Table', group = 'Table')
 sizeTa  = input.string('Small', 'Table Size', options = ['Tiny', 'Small', 'Normal', 'Large'], group = 'Table')
 volTa   = input(false, title = 'Current Volume on Table', group = 'Table')
 buzzTa  = input(false, title = 'Vol. Buzz on Table', group = 'Table')
-TabCol  = input(color.rgb(59,60,66,0), title = 'Label Color', group = 'Table')
-txtTCol = input(color.white, title = 'Volume Color', group = 'Table')
+TabCol  = input(color.rgb(59,60,66,0), title = 'Table Color', group = 'Table')
+txtTCol = input(color.white, title = 'Info Color', group = 'Table')
 posTCol  = input(color.lime, title='Positive Buzz Color', group = 'Table')
 negTCol  = input(color.red, title='Negative Buzz Color', group = 'Table')
 
-tf      = timeframe.period
-ticker  = syminfo.tickerid
+// Highest Volume Info only available in Daily, Weekly or Monthly
+hv := hv and (timeframe.isdaily or timeframe.isweekly or timeframe.ismonthly)
+
+tf = timeframe.period
+s  = syminfo.tickerid
 
 // Switch Label Size
 sLabel = switch labelS
@@ -57,13 +63,17 @@ taSize = switch sizeTa
     'Large'   => size.large
 
 // Volume and MA calculation
-s       = ticker
-vol     = request.security(s, tf, volume)
+vol  = volume // request.security(s, tf, volume)
+ma   = timeframe.isweekly ? ta.sma(vol, lenWe) : ta.sma(vol, lenDa)
 // Color of Volumes
 colr = close>=open ? colUp:colDn
 if(prevC)
     colr := close>=close[1] ? colUp:colDn
-ma = timeframe.isweekly ? ta.sma(vol, lenWe) : ta.sma(vol, lenDa)
+// Low Relative Volume
+lowRVol = ta.lowest(vol, 10)
+if(lowRVol==vol and lwVol)
+    colr := colLw
+
 
 // Display in the style of MarketSmith
 // Recalculation of the volume with limitation
@@ -71,6 +81,21 @@ vol2 = vol > 2*ma ? 2*ma:vol
 // Display
 plot(trunc ? vol2:vol, title = 'Volume' , color = colr, style = plot.style_histogram, linewidth = 3)
 plot(ma, title = 'MA', color = colMa)
+
+
+// Highest Volume Edge (TraderLion)
+// 1) Highest Volume Ever (HVE)
+var hve = vol
+if (vol > hve)
+    hve := vol
+// 2) Highest Volume In Over a Year (HV1)
+oneYear = 252
+if (timeframe.isweekly)
+    oneYear := 52
+if (timeframe.ismonthly)
+    oneYear := 12
+hvone = ta.highest(vol, oneYear)
+
 
 // Formatting Volume
 uV = ''
@@ -115,51 +140,113 @@ if(advDol >= 1000000000)
 // For Good Beat after the Peak Volume Bars Period
 pivotHigh  = ta.pivothigh(volume, peakL, peakL)
 varPercent = 100*(vol[peakL]/ma[peakL])-100
+//var label volestvolA  = na
 var label volestvol   = na
 var label volestvolU  = na
+//var label volestvol2A = na
 var label volestvol2  = na
 var label volestvol2U = na
-if(labels)
-    // If we have a good % beat in a period lower than the Peak Volume Bars Period
-    v = showLab ? 1:0  // If the label is visible, we don't want the last bar to have a text above
-    for i=peakL-1 to v
-        pivotHigh2 = ta.pivothigh(volume, peakL, i)
-        varPercent2 = 100*(vol[i]/ma[i])-100
-        if(barstate.islast and pivotHigh2 and varPercent2>25)
-            textvol9  = 'N/A'
-            textvol9U = 'N/A'
-            if(percChg)
-                textvol9  := str.tostring(volFormat[i], '0.0')+uV[i]+'\n'
-                textvol9U := '+'+str.tostring(varPercent2, '0')+'%'
-            if(not percChg)
-                textvol9  := str.tostring(volFormat[i], '0.0')+uV[i]
-                textvol9U := na
-            // Delete Previous Labels to avoid superposition
-            if not na(volestvol2)
-                label.delete(volestvol2)
-            if not na(volestvol2U)
-                label.delete(volestvol2U)
-            // Create Label
-            volestvol2  := label.new(bar_index-i, trunc ? vol2[i]:vol[i], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text=textvol9 , textcolor=labelC)
-            volestvol2U := label.new(bar_index-i, trunc ? vol2[i]:vol[i], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text=textvol9U, textcolor=colChg)
-    // For Label After the Peak Period
-    if (pivotHigh and varPercent>25)
-        string textvol9  = 'N/A'
-        string textvol9U = 'N/A'
-        if(percChg)
-            textvol9 := str.tostring(volFormat[peakL], '0.0')+uV[peakL]+'\n'
-            textvol9U := '+'+str.tostring(varPercent, '0')+'%'
-        if(not percChg)
-            textvol9 := str.tostring(volFormat[peakL], '0.0')+uV[peakL]
-            textvol9U := na
-        // Delete Previous Labels2 of the first part to avoid superposition
+
+
+
+// If we have a good % beat in a period lower than the Peak Volume Bars Period
+v = showLab ? 1:0  // If the label is visible, we don't want the last bar to have a text above
+// HVE or HV1 on current bar with Label on Current Bar activated
+if(vol==hvone and vol<hve and showLab and hv)
+    volestvol2  := label.new(bar_index, trunc ? vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text='HV1   ' , textcolor=labelC)
+if(vol==hve and showLab and hv)
+    volestvol2  := label.new(bar_index, trunc ? vol2:vol, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text='HVE   ' , textcolor=labelC)
+for i=peakL-1 to v
+    pivotHigh2 = ta.pivothigh(vol, peakL, i)
+    varPercent2 = 100*(vol[i]/ma[i])-100
+    // For Labels Between the last bar and the Peak Period (To the Right)
+    if(barstate.islast and pivotHigh2 and varPercent2>2)
+        string sharesText  = na
+        string percentText = na
+        /// Every probabilities for entries (8 possibilities, 2^3) - 000 not needed
+        if(not shrsN and not percChg and hv)  // 001
+            if(vol[i]==hvone[i])
+                sharesText := 'HV1'
+            if(vol[i]==hve[i])
+                sharesText := 'HVE'
+        if(not shrsN and percChg and not hv)  // 010
+            percentText := '+'+str.tostring(varPercent2, '0')+'%'
+        if(not shrsN and percChg and hv)      // 011
+            if(vol[i]==hvone[i])
+                sharesText := 'HV1\n'
+            if(vol[i]==hve[i])
+                sharesText  := 'HVE\n'
+            percentText := '+'+str.tostring(varPercent2, '0')+'%'
+        if(shrsN and not percChg and not hv) // 100
+            sharesText  := str.tostring(volFormat[i], '0.0')+uV[i]
+        if(shrsN and not percChg and hv)     // 101
+            sharesText  := str.tostring(volFormat[i], '0.0')+uV[i]
+            if(vol[i]==hvone[i])
+                sharesText := 'HV1 ● ' + str.tostring(volFormat[i], '0.0')+uV[i]
+            if(vol[i]==hve[i])
+                sharesText  := 'HVE ● ' + str.tostring(volFormat[i], '0.0')+uV[i]
+        if(shrsN and percChg and not hv)     // 110
+            sharesText  := str.tostring(volFormat[i], '0.0')+uV[i]+'\n'
+            percentText := '+'+str.tostring(varPercent2, '0')+'%'
+        if(shrsN and percChg and hv)         // 111
+            sharesText  := str.tostring(volFormat[i], '0.0')+uV[i]+'\n'
+            if(vol[i]==hvone[i])
+                sharesText := 'HV1 ● ' + str.tostring(volFormat[i], '0.0')+uV[i]+'\n'
+            if(vol[i]==hve[i])
+                sharesText  := 'HVE ● ' + str.tostring(volFormat[i], '0.0')+uV[i]+'\n'
+            percentText := '+'+str.tostring(varPercent2, '0')+'%'
+        // Delete Previous Labels to avoid superposition
         if not na(volestvol2)
             label.delete(volestvol2)
         if not na(volestvol2U)
             label.delete(volestvol2U)
         // Create Label
-        volestvol  := label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size= sLabel, text=textvol9,  textcolor=labelC)
-        volestvolU := label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size= sLabel, text=textvol9U, textcolor=colChg)
+        volestvol2  := label.new(bar_index-i, trunc ? vol2[i]:vol[i], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text=sharesText , textcolor=labelC)
+        volestvol2U := label.new(bar_index-i, trunc ? vol2[i]:vol[i], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size = sLabel, text=percentText, textcolor=colChg)
+// For Labels After the Peak Period (To the Left)
+if (pivotHigh and varPercent>25)
+    string sharesText  = na
+    string percentText = na
+    /// Every probabilities for entries (8 possibilities, 2^3) - 000 not needed
+    if(not shrsN and not percChg and hv)  // 001
+        if(vol[peakL]==hvone[peakL])
+            sharesText := 'HV1'
+        if(vol[peakL]==hve[peakL])
+            sharesText := 'HVE'
+    if(not shrsN and percChg and not hv)  // 010
+        percentText := '+'+str.tostring(varPercent, '0')+'%'
+    if(not shrsN and percChg and hv)      // 011
+        if(vol[peakL]==hvone[peakL])
+            sharesText := 'HV1\n'
+        if(vol[peakL]==hve[peakL])
+            sharesText  := 'HVE\n'
+        percentText := '+'+str.tostring(varPercent, '0')+'%'
+    if(shrsN and not percChg and not hv) // 100
+        sharesText  := str.tostring(volFormat[peakL], '0.0')+uV[peakL]
+    if(shrsN and not percChg and hv)     // 101
+        sharesText  := str.tostring(volFormat[peakL], '0.0')+uV[peakL]
+        if(vol[peakL]==hvone[peakL])
+            sharesText := 'HV1 ● ' + str.tostring(volFormat[peakL], '0.0')+uV[peakL]
+        if(vol[peakL]==hve[peakL])
+            sharesText  := 'HVE ● ' + str.tostring(volFormat[peakL], '0.0')+uV[peakL]
+    if(shrsN and percChg and not hv)     // 110
+        sharesText  := str.tostring(volFormat[peakL], '0.0')+uV[peakL]+'\n'
+        percentText := '+'+str.tostring(varPercent, '0')+'%'
+    if(shrsN and percChg and hv)         // 111
+        sharesText := str.tostring(volFormat[peakL], '0.0')+uV[peakL]+'\n'
+        if(vol[peakL]==hvone[peakL])
+            sharesText := 'HV1 ● ' + str.tostring(volFormat[peakL], '0.0')+uV[peakL]+'\n'
+        if(vol[peakL]==hve[peakL])
+            sharesText  := 'HVE ● ' + str.tostring(volFormat[peakL], '0.0')+uV[peakL]+'\n'
+        percentText := '+'+str.tostring(varPercent, '0')+'%'
+    // Delete Previous Labels2 of the first part to avoid superposition
+    if not na(volestvol2)
+        label.delete(volestvol2)
+    if not na(volestvol2U)
+        label.delete(volestvol2U)
+    // Create Label
+    volestvol  := label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size=sLabel, text=sharesText,  textcolor=labelC)
+    volestvolU := label.new(bar_index-peakL, trunc ? vol2[peakL]:vol[peakL], xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, size=sLabel, text=percentText, textcolor=colChg)
 
 
 
@@ -167,11 +254,14 @@ if(labels)
 //Formatting Percentage Variation
 volBuzz = 100*(vol/ma)-100
 txtCol  = volBuzz >= 0 ? posCol:negCol
+percVarVal = plot(volBuzz, title = 'Volume Buzz', color = color.rgb(39,54,233,100))
+
 
 // Text on labels
 txtVol    = str.tostring(volFormat)+uV+'\n'
 txtDolVol = 'N/A'
 txtVar    = volBuzz >= 0 ? '\n+'+str.tostring(math.round(volBuzz))+'%':'\n'+str.tostring(math.round(volBuzz))+'%'
+
 
 // Label Display
 if barstate.islast and showLab
@@ -181,7 +271,7 @@ if barstate.islast and showLab
     label.delete(currentBuz[1])
 
 
-// Up/Down Volume Ratio ( Thanks Brandon ;) )
+// Up/Down Volume Ratio
 upVol =         close > close[1] ? volume : 0
 dnVol =         close < close[1] ? volume : 0
 sumUp =         math.sum(upVol, 50)
@@ -218,3 +308,8 @@ if barstate.islast and showTa
         table.cell(t, 1, 4, volBuzz >= 0 ? '+'+str.tostring(math.round(volBuzz))+'%':str.tostring(math.round(volBuzz))+'%', text_color =volBuzz >= 0 ? posTCol:negTCol, text_size=taSize)
         table.cell_set_text_halign(t, 0,  4, text_halign = text.align_right)
         table.cell_set_text_halign(t, 1,  4, text_halign = text.align_right)
+
+    // Gestion of Input (simplified)
+    // Si je détecte un HV1 ou HVE j'affiche les infos du label (Compliqué)
+    // Optimiser structure
+ 
