@@ -1,6 +1,9 @@
 # MarketSmith-Indicator-TradingView
 Hello everyone,
 
+Everything is now available directly on TradingView!
+https://www.tradingview.com/u/Fred6724/#published-scripts
+
 I have made these scripts available for you to replicate visually and functionally MarketSmith graphs on a free subscription plan on TradingView.
 
 To import them, just copy the entire code text and go on your TradingView graph.
