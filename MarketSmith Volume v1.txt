@@ -124,16 +124,16 @@ if(advVol >= 1000000000)
     uVAvg := 'B'
 
 // Average $ Volume
-advDol = math.round(close*ma, 0)
+advDol = math.round(close*ma, 2)
 uVDoll = ''
 if(advDol >= 1000 and advDol < 1000000)
-    advDol := math.round(advDol/1000, 0)
+    advDol := math.round(advDol/1000, 2)
     uVDoll := 'K'
 if(advDol >= 1000000 and advDol < 1000000000)
-    advDol := math.round(advDol/1000000, 0)
+    advDol := math.round(advDol/1000000, 2)
     uVDoll := 'M'
 if(advDol >= 1000000000)
-    advDol := math.round(advDol/1000000000, 0)
+    advDol := math.round(advDol/1000000000, 2)
     uVDoll := 'B'
 
 // Labels: Marked Highs Volume Bars Peak     &     %Variation Labels
